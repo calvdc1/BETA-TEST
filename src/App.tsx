@@ -99,13 +99,13 @@ const CAMPUSES: Campus[] = [
     location: "Marawi City, Lanao del Sur",
     description: "The flagship campus of the Mindanao State University System and the core academic and cultural hub of MSU.",
     stats: { students: "25k+", courses: "180+" },
-    top: "10%", left: "8%",
+    top: "12%", left: "8%",
     color: "#8e1212",
     website: "https://www.msumain.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Main+Campus+Marawi+City",
     sources: [
       { label: "MSU Main Official", url: "https://www.msumain.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University" }
     ]
   },
   {
@@ -114,7 +114,7 @@ const CAMPUSES: Campus[] = [
     location: "Iligan City",
     description: "A leading institute in science, engineering, IT, and liberal arts in Northern Mindanao.",
     stats: { students: "18k+", courses: "120+" },
-    top: "18%", left: "82%",
+    top: "26%", left: "82%",
     color: "#1a3a5a",
     website: "https://www.msuiit.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU-IIT+Iligan+City",
@@ -129,13 +129,13 @@ const CAMPUSES: Campus[] = [
     location: "General Santos City",
     description: "Serving the SOCCSKSARGEN region through programs in education, business, and applied sciences.",
     stats: { students: "12k+", courses: "90+" },
-    top: "30%", left: "12%",
+    top: "38%", left: "12%",
     color: "#1b5e20",
     website: "https://gensan.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+General+Santos+Campus",
     sources: [
       { label: "MSU Gensan Official", url: "https://gensan.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "CHED Listing", url: "https://ched.gov.ph/" }
     ]
   },
   {
@@ -144,13 +144,13 @@ const CAMPUSES: Campus[] = [
     location: "Bongao, Tawi-Tawi",
     description: "Known for fisheries, marine science, and ocean-related studies in the southern Philippines.",
     stats: { students: "8k+", courses: "45+" },
-    top: "42%", left: "78%",
+    top: "56%", left: "76%",
     color: "#01579b",
     website: "https://tawitawi.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography",
     sources: [
       { label: "MSU Tawi-Tawi Official", url: "https://tawitawi.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography" }
     ]
   },
   {
@@ -159,13 +159,13 @@ const CAMPUSES: Campus[] = [
     location: "Naawan, Misamis Oriental",
     description: "A center for fisheries, aquaculture, and coastal resource research and development.",
     stats: { students: "5k+", courses: "35+" },
-    top: "14%", left: "68%",
+    top: "18%", left: "74%",
     color: "#e65100",
     website: "https://naawan.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Naawan",
     sources: [
       { label: "MSU Naawan Official", url: "https://naawan.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Naawan" }
     ]
   },
   {
@@ -174,13 +174,13 @@ const CAMPUSES: Campus[] = [
     location: "Datu Odin Sinsuat, Maguindanao",
     description: "A major MSU campus focused on inclusive development, governance, and community-based learning.",
     stats: { students: "7k+", courses: "50+" },
-    top: "60%", left: "10%",
+    top: "64%", left: "10%",
     color: "#33691e",
     website: "https://maguindanao.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Maguindanao",
     sources: [
       { label: "MSU Maguindanao Official", url: "https://maguindanao.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Maguindanao" }
     ]
   },
   {
@@ -189,13 +189,13 @@ const CAMPUSES: Campus[] = [
     location: "Jolo, Sulu",
     description: "Supports higher education access and peace-building initiatives in Sulu and nearby island communities.",
     stats: { students: "6k+", courses: "40+" },
-    top: "48%", left: "86%",
+    top: "44%", left: "84%",
     color: "#bf360c",
     website: "https://sulu.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Sulu",
     sources: [
       { label: "MSU Sulu Official", url: "https://sulu.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Sulu" }
     ]
   },
   {
@@ -204,103 +204,13 @@ const CAMPUSES: Campus[] = [
     location: "Buug, Zamboanga Sibugay",
     description: "Provides programs in teacher education, agriculture, and community extension services.",
     stats: { students: "4k+", courses: "30+" },
-    top: "72%", left: "68%",
+    top: "70%", left: "68%",
     color: "#4a148c",
     website: "https://buug.msu.edu.ph/",
     mapUrl: "https://www.google.com/maps/search/MSU+Buug",
     sources: [
       { label: "MSU Buug Official", url: "https://buug.msu.edu.ph/" },
-      { label: "MSU System", url: "https://www.msu.edu.ph/" }
-    ]
-  },
-  {
-    name: "MSU Maigo School of Arts and Trades",
-    slug: "msu-maigo-sat",
-    location: "Maigo, Lanao del Norte",
-    description: "An MSU external unit offering technical-vocational and teacher education pathways.",
-    stats: { students: "2k+", courses: "20+" },
-    top: "22%", left: "60%",
-    color: "#0d47a1",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+Maigo+School+of+Arts+and+Trades",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Maigo+School+of+Arts+and+Trades" }
-    ]
-  },
-  {
-    name: "MSU LNCAT",
-    slug: "msu-lncat",
-    location: "Bacolod, Lanao del Norte",
-    description: "Lanao del Norte College of Arts and Trades, an MSU external campus for industry-oriented education.",
-    stats: { students: "3k+", courses: "25+" },
-    top: "28%", left: "54%",
-    color: "#004d40",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+LNCAT+Bacolod+Lanao+del+Norte",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+LNCAT+Bacolod+Lanao+del+Norte" }
-    ]
-  },
-  {
-    name: "MSU Malabang Community High School",
-    slug: "msu-malabang-extension",
-    location: "Malabang, Lanao del Sur",
-    description: "Community high school extension under the MSU system serving local learners.",
-    stats: { students: "1k+", courses: "HS Tracks" },
-    top: "58%", left: "22%",
-    color: "#6a1b9a",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+Malabang+Community+High+School",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Malabang+Community+High+School" }
-    ]
-  },
-  {
-    name: "MSU Marantao Community High School",
-    slug: "msu-marantao-extension",
-    location: "Marantao, Lanao del Sur",
-    description: "An MSU-linked extension community high school supporting secondary education access.",
-    stats: { students: "900+", courses: "HS Tracks" },
-    top: "50%", left: "30%",
-    color: "#283593",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+Marantao+Community+High+School",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Marantao+Community+High+School" }
-    ]
-  },
-  {
-    name: "MSU Masiu Community High School",
-    slug: "msu-masiu-extension",
-    location: "Masiu, Lanao del Sur",
-    description: "A community high school extension connected to the MSU system in the Lanao area.",
-    stats: { students: "800+", courses: "HS Tracks" },
-    top: "66%", left: "26%",
-    color: "#ad1457",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+Masiu+Community+High+School",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Masiu+Community+High+School" }
-    ]
-  },
-  {
-    name: "MSU Balindong Community High School",
-    slug: "msu-balindong-extension",
-    location: "Balindong, Lanao del Sur",
-    description: "MSU extension-focused community high school for underserved municipalities.",
-    stats: { students: "700+", courses: "HS Tracks" },
-    top: "74%", left: "34%",
-    color: "#37474f",
-    website: "https://www.msu.edu.ph/",
-    mapUrl: "https://www.google.com/maps/search/MSU+Balindong+Community+High+School",
-    sources: [
-      { label: "MSU System", url: "https://www.msu.edu.ph/" },
-      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Balindong+Community+High+School" }
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Buug" }
     ]
   },
 ];
@@ -588,11 +498,9 @@ export default function App() {
   useEffect(() => {
     if (!showSplash) return;
 
-    // Mark splash as seen immediately so refresh won't replay it.
-    localStorage.setItem('onemsu_splash_seen', 'true');
-
     const timer = setTimeout(() => {
       setShowSplash(false);
+      localStorage.setItem('onemsu_splash_seen', 'true');
     }, 10000);
 
     return () => clearTimeout(timer);
@@ -844,12 +752,6 @@ export default function App() {
       }
     };
   }, [view]);
-
-  useEffect(() => {
-    if (view === 'explorer' && selectedCampus) {
-      setActiveCampusSlug(selectedCampus.slug);
-    }
-  }, [view, selectedCampus]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -1457,17 +1359,17 @@ export default function App() {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await parseMaybeJson(res);
-      if (res.ok && data.success) {
+      const data = await res.json();
+      if (data.success) {
         setUser(data.user);
         setIsLoggedIn(true);
         setView('dashboard');
         setIsLoginOpen(false);
       } else {
-        setAuthError((data as any).message || 'Invalid credentials.');
+        setAuthError(data.message || 'Invalid credentials.');
       }
-    } catch (error: any) {
-      setAuthError(error?.message?.includes('fetch') ? 'Cannot reach server. Please check your connection and try again.' : 'Unable to sign in right now. Please try again.');
+    } catch {
+      setAuthError('Unable to sign in right now. Please try again.');
     } finally {
       setIsAuthLoading(false);
     }
@@ -1493,17 +1395,17 @@ export default function App() {
         body: JSON.stringify({ name, email, password, campus, student_id, program, year_level })
       });
 
-      const data = await parseMaybeJson(res);
-      if (res.ok && data.success) {
+      const data = await res.json();
+      if (data.success) {
         setUser(data.user);
         setIsLoggedIn(true);
         setView('dashboard');
         setIsSignupOpen(false);
       } else {
-        setAuthError((data as any).message || 'Unable to create account.');
+        setAuthError(data.message || 'Unable to create account.');
       }
-    } catch (error: any) {
-      setAuthError(error?.message?.includes('fetch') ? 'Cannot reach server. Please check your connection and try again.' : 'Unable to create account right now. Please try again.');
+    } catch {
+      setAuthError('Unable to create account right now. Please try again.');
     } finally {
       setIsAuthLoading(false);
     }
@@ -2390,15 +2292,12 @@ export default function App() {
                     setSelectedCampus(activeCampus);
                     setShowCampusModal(true);
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                  className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md"
                 >
                   View Details
                 </button>
-                <button
-                  onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
-                >
-                  3D Campus Map
+                <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
+                  Campus Map
                 </button>
               </div>
             </div>
