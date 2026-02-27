@@ -428,6 +428,8 @@ export default function App() {
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
+  const [showCampusModal, setShowCampusModal] = useState(false);
+  const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -1439,7 +1441,7 @@ export default function App() {
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
                           <button 
-                            onClick={() => setSelectedCampus(c)}
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
                             className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
                           >
                             About
@@ -1767,7 +1769,9 @@ export default function App() {
           transition={{ duration: 5 + (i % 3), repeat: Infinity, ease: "easeInOut" }}
           className="absolute pointer-events-auto select-none hidden md:block cursor-pointer z-20"
           onClick={() => {
-            setSelectedCampus(c);
+            setActiveCampusSlug(c.slug);
+            setSelectedCampus(null);
+            setShowCampusModal(false);
             setView('explorer');
           }}
         >
@@ -2116,7 +2120,7 @@ export default function App() {
   );
 
   const renderExplorer = () => {
-    const activeCampus = selectedCampus || CAMPUSES[0];
+    const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
       <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
@@ -2130,7 +2134,7 @@ export default function App() {
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setSelectedCampus(campus)}
+                onClick={() => setActiveCampusSlug(campus.slug)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2181,6 +2185,15 @@ export default function App() {
               <div className="flex gap-3">
                 <button className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md">
                   Official Website
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedCampus(activeCampus);
+                    setShowCampusModal(true);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md"
+                >
+                  View Details
                 </button>
                 <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
                   Campus Map
@@ -2272,7 +2285,7 @@ export default function App() {
 
         {/* Campus Detail Modal */}
         <AnimatePresence>
-          {selectedCampus && (
+          {showCampusModal && selectedCampus && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -2285,7 +2298,7 @@ export default function App() {
                     <CampusLogo slug={selectedCampus.slug} />
                   </div>
                   <button 
-                    onClick={() => setSelectedCampus(null)}
+                    onClick={() => { setShowCampusModal(false); setSelectedCampus(null); }}
                     className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
                   >
                     <X size={20} />
