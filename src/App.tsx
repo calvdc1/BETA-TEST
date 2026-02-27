@@ -687,11 +687,6 @@ export default function App() {
     }
   }, [view]);
 
-  const viewRef = useRef(view);
-  useEffect(() => {
-    viewRef.current = view;
-  }, [view]);
-
   useEffect(() => {
     const handleHashChange = () => {
       const hashView = getViewFromHash();
