@@ -1842,8 +1842,40 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl border border-amber-300/20 bg-[#0f1014]/85 backdrop-blur-md shadow-2xl sticky bottom-4 z-20">
-              <h3 className="font-bold mb-4 text-amber-100">Navigation & Quick Actions</h3>
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
+              <h3 className="font-bold mb-4 flex items-center gap-2"><Globe size={18} className="text-amber-500" /> Campus Information</h3>
+              <div className="space-y-3">
+                {CAMPUSES.map((c) => (
+                  <div key={c.slug} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-500/30 transition-all group">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 shrink-0 rounded-xl overflow-hidden shadow-lg">
+                        <CampusLogo slug={c.slug} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
+                          <button 
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
+                            className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
+                          >
+                            About
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1 mb-2">
+                          <MapPin size={10} /> {c.location}
+                        </div>
+                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                          {c.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
+              <h3 className="font-bold mb-4">Navigation & Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: 'Messenger', icon: <MessageCircle size={14} />, action: () => setView('messenger'), unread: messengerUnread },
@@ -1924,8 +1956,122 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-amber-500/20 bg-black/30 p-4 text-xs text-gray-300">
-              Community Groups are now in the floating Quick Actions panel for easier access on mobile and desktop.
+            <div className="grid grid-cols-1 gap-6">
+              <div className="p-6 rounded-3xl bg-black/30 border border-white/10 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold flex items-center gap-2"><Users size={18} className="text-amber-500" /> Community Groups</h4>
+                  <button
+                    onClick={() => setDashboardCreateOpen(v => !v)}
+                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-300 hover:bg-white/20"
+                  >
+                    {dashboardCreateOpen ? 'Close' : 'Create'}
+                  </button>
+                </div>
+                {dashboardCreateOpen && (
+                  <div className="mb-4 space-y-2">
+                    <input
+                      value={newGroup.name}
+                      onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
+                      placeholder="Group name"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                    />
+                    <select
+                      value={newGroup.campus}
+                      onChange={(e) => setNewGroup({ ...newGroup, campus: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                    >
+                      <option value="" className="bg-[#0a0502]">Select campus</option>
+                      {CAMPUSES.map(c => (
+                        <option key={c.slug} value={c.name} className="bg-[#0a0502]">{c.name}</option>
+                      ))}
+                    </select>
+                    <textarea
+                      value={newGroup.description}
+                      onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
+                      placeholder="Description (optional)"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                      rows={2}
+                    />
+                    <div className="flex items-center gap-3">
+                      <label className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 cursor-pointer w-fit">
+                        Upload logo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) { setNewGroup({ ...newGroup, logoPreview: '' }); return; }
+                            const reader = new FileReader();
+                            reader.onload = () => setNewGroup({ ...newGroup, logoPreview: reader.result as string });
+                            reader.readAsDataURL(file);
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      {newGroup.logoPreview ? <span className="text-xs text-amber-400">Logo attached</span> : <span className="text-xs text-gray-500">Optional</span>}
+                    </div>
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!newGroup.name || !newGroup.campus || dashboardCreating) return;
+                          setDashboardCreating(true);
+                          try {
+                            let logoUrl: string | undefined;
+                            if (newGroup.logoPreview) {
+                              const up = await fetch('/api/upload', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ dataUrl: newGroup.logoPreview })
+                              }).then(safeJson);
+                              if (up.success) logoUrl = up.url;
+                            }
+                            const res = await fetch('/api/groups', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ name: newGroup.name, description: newGroup.description, campus: newGroup.campus, logoUrl })
+                            }).then(safeJson);
+                            if (res.success) {
+                              setGroups((prev) => [res.group, ...prev]);
+                              setNewGroup({ name: '', description: '', campus: '', logoPreview: '' });
+                              setDashboardCreateOpen(false);
+                            }
+                          } finally {
+                            setDashboardCreating(false);
+                          }
+                        }}
+                        disabled={!newGroup.name || !newGroup.campus || dashboardCreating}
+                        aria-busy={dashboardCreating}
+                        className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
+                      >
+                        {dashboardCreating ? 'Creating…' : 'Create Group'}
+                      </button>
+                    </div>
+                    <div className="h-px w-full bg-white/10" />
+                  </div>
+                )}
+                <div className="space-y-3">
+                  {loadingGroups && <div className="text-sm text-gray-500">Loading groups...</div>}
+                  {!loadingGroups && groups.length === 0 && <div className="text-sm text-gray-500">No groups found.</div>}
+                  {!loadingGroups && groups.map(group => (
+                    <div key={group.id} className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div>
+                        <span className="text-sm">{group.name}</span>
+                        <span className="block text-[10px] text-gray-500">{group.campus}</span>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setActiveRoom(group.name.toLowerCase().replace(/\s+/g, '-'));
+                          setView('messenger');
+                        }}
+                        className="text-amber-500 hover:text-amber-400 text-xs"
+                      >
+                        Join
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
