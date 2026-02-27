@@ -629,9 +629,6 @@ export default function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setShowWelcome(false);
-  }, []);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('onemsu_auth') === 'true';
@@ -3460,7 +3457,6 @@ export default function App() {
             ref={idCardRef}
             initial={{ rotateY: -10, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
-            ref={idCardRef}
             className="w-full max-w-md mx-auto aspect-[1.58/1] bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] rounded-3xl border-2 border-white/10 shadow-2xl overflow-hidden relative preserve-3d"
           >
             {/* Background Pattern */}
