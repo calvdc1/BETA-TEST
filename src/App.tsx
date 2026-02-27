@@ -65,13 +65,15 @@ interface User {
 }
 
 interface Message {
-  id: number;
+  id: number | string;
   sender_id: number;
   sender_name: string;
   content: string;
   room_id: string;
   media_url?: string;
   media_type?: string;
+  reaction_count?: number;
+  user_reaction?: string | null;
   timestamp: string;
   deleted?: boolean;
 }
@@ -1362,9 +1364,24 @@ export default function App() {
       return;
     }
 
-    if (!socketRef.current) {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      try {
+        const res = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senderId: user.id, senderName: user.name, content: text, roomId: activeRoom, mediaUrl, mediaType })
+        }).then(safeJson);
+
+        if (res.success && res.message) {
+          setMessages(prev => [...prev, res.message]);
+          setTimeout(() => {
+            virtuosoRef.current?.scrollToIndex({ index: 'last', align: 'end', behavior: 'smooth' });
+          }, 50);
+        }
+      } finally {
         setIsSending(false);
-        return;
+      }
+      return;
     }
 
     // Create a clientId so we can remove the optimistic copy when server echoes back
@@ -1866,6 +1883,7 @@ export default function App() {
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
                   { name: 'Profile', icon: <Users size={14} />, action: () => setView('profile') },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
+                  { name: 'Community Groups', icon: <Users size={14} />, action: () => { setView('messenger'); if (joinedGroups.length) { setActiveRoom(joinedGroups[0].name.toLowerCase().replace(/\s+/g, '-')); } } },
                   { name: 'Lost & Found', icon: <Search size={14} />, action: () => setView('lostfound') },
                   { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
                   { name: 'Library', icon: <BookOpen size={14} />, action: () => window.open('https://openlibrary.org', '_blank') },
@@ -3959,6 +3977,26 @@ export default function App() {
     }, 2000);
   };
 
+  const reactToMessage = async (messageId: number | string, reaction: string) => {
+    if (!user || !messageId || String(messageId).startsWith('local-')) return;
+
+    const target = messages.find(m => String(m.id) === String(messageId));
+    const nextReaction = target?.user_reaction === reaction ? '' : reaction;
+
+    const res = await fetch(`/api/messages/${messageId}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, reaction: nextReaction })
+    }).then(safeJson);
+
+    if (res.success) {
+      setMessages(prev => prev.map(m => String(m.id) === String(messageId)
+        ? { ...m, reaction_count: res.reaction_count, user_reaction: res.user_reaction }
+        : m
+      ));
+    }
+  };
+
   const renderMessenger = () => {
     // Determine the other participant in a DM
     let otherParticipantId: number | null = null;
@@ -4421,6 +4459,21 @@ export default function App() {
                                 {new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                               </span>
                             )}
+                            <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'} flex-wrap`}>
+                              {['👍', '❤️', '🔥'].map((emoji) => (
+                                <button
+                                  key={`${m.id}-${emoji}`}
+                                  onClick={() => reactToMessage(m.id, emoji)}
+                                  className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${m.user_reaction === emoji ? 'bg-amber-400/90 text-black border-amber-300' : 'bg-white/5 text-gray-300 border-white/10 hover:border-amber-400/50'}`}
+                                  type="button"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                              {(m.reaction_count ?? 0) > 0 && (
+                                <span className="text-[10px] text-amber-300 px-2">{m.user_reaction || '💬'} {(m.reaction_count ?? 0)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
