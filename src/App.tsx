@@ -106,6 +106,7 @@ const CAMPUSES: Campus[] = [
     mapUrl: "https://www.google.com/maps/search/MSU+Main+Campus+Marawi+City",
     sources: [
       { label: "MSU Main Official", url: "https://www.msumain.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
       { label: "MSU System", url: "https://www.msu.edu.ph/" }
       { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University" }
     ]
@@ -674,11 +675,20 @@ export default function App() {
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('onemsu_welcome_seen') !== 'true';
+  });
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeSecond, setWelcomeSecond] = useState(60);
 
   useEffect(() => {
     if (showSplash) return;
+    if (typeof window !== 'undefined' && localStorage.getItem('onemsu_welcome_seen') === 'true') return;
+    if (view !== 'home') return;
+    setShowWelcome(true);
+    setWelcomeSecond(60);
+  }, [showSplash, view]);
     setShowWelcome(true);
     setWelcomeSecond(60);
   }, [showSplash]);
@@ -689,6 +699,7 @@ export default function App() {
       setWelcomeSecond((prev) => {
         if (prev <= 1) {
           setShowWelcome(false);
+          localStorage.setItem('onemsu_welcome_seen', 'true');
           return 0;
         }
         return prev - 1;
@@ -1555,6 +1566,9 @@ export default function App() {
       }
     } catch (error: any) {
       setAuthError(error?.message?.includes('fetch') ? 'Cannot reach server. Please check your connection and try again.' : 'Unable to sign in right now. Please try again.');
+      }
+    } catch (error: any) {
+      setAuthError(error?.message?.includes('fetch') ? 'Cannot reach server. Please check your connection and try again.' : 'Unable to sign in right now. Please try again.');
         setAuthError(data.message || 'Invalid credentials.');
       }
     } catch {
@@ -1611,6 +1625,26 @@ export default function App() {
         setView('dashboard');
         setIsSignupOpen(false);
         setAuthError(null);
+      }
+    } catch (_error: any) {
+      const localUser = {
+        id: Date.now(),
+        name,
+        email,
+        campus,
+        avatar: null,
+        student_id,
+        program,
+        year_level,
+        department: null,
+        bio: null,
+        cover_photo: null,
+      } as User;
+      setUser(localUser);
+      setIsLoggedIn(true);
+      setView('dashboard');
+      setIsSignupOpen(false);
+      setAuthError(null);
       }
     } catch (_error: any) {
       const localUser = {
@@ -4658,6 +4692,7 @@ export default function App() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl md:text-3xl font-black text-metallic-gold">{WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].title}</h2>
+                <button onClick={() => { setShowWelcome(false); localStorage.setItem('onemsu_welcome_seen', 'true'); }} className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-bold hover:bg-white/20">Skip</button>
                 <button onClick={() => setShowWelcome(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-bold hover:bg-white/20">Skip</button>
               </div>
 
@@ -4684,6 +4719,7 @@ export default function App() {
               </div>
 
               <div className="flex justify-end gap-3">
+                <button onClick={() => { setShowWelcome(false); localStorage.setItem('onemsu_welcome_seen', 'true'); }} className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold hover:bg-white/20">Start Exploring</button>
                 <button onClick={() => setShowWelcome(false)} className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold hover:bg-white/20">Start Exploring</button>
               </div>
             </motion.div>
