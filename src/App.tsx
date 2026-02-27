@@ -65,13 +65,15 @@ interface User {
 }
 
 interface Message {
-  id: number;
+  id: number | string;
   sender_id: number;
   sender_name: string;
   content: string;
   room_id: string;
   media_url?: string;
   media_type?: string;
+  reaction_count?: number;
+  user_reaction?: string | null;
   timestamp: string;
   deleted?: boolean;
 }
@@ -466,7 +468,7 @@ const BrandLogoChoice = ({ variant, className = "w-20 h-20" }: { variant: number
   </svg>
 );
 
-const SplashScreen = () => {
+const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
   const [statusIndex, setStatusIndex] = useState(0);
   
@@ -479,24 +481,30 @@ const SplashScreen = () => {
   ];
 
   useEffect(() => {
-    const duration = 10000; // 10 seconds
+    const duration = 7000;
     const interval = 50;
     const steps = duration / interval;
     const increment = 100 / steps;
-    
+
     const timer = setInterval(() => {
       setProgress(prev => Math.min(prev + increment, 100));
     }, interval);
 
     const statusTimer = setInterval(() => {
       setStatusIndex(prev => (prev + 1) % statuses.length);
-    }, 2000);
-    
+    }, 1400);
+
     return () => {
       clearInterval(timer);
       clearInterval(statusTimer);
     };
   }, []);
+
+  useEffect(() => {
+    if (progress < 100) return;
+    const doneTimer = setTimeout(() => onComplete(), 1200);
+    return () => clearTimeout(doneTimer);
+  }, [progress, onComplete]);
 
   return (
     <div className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center overflow-hidden">
@@ -573,6 +581,18 @@ const SplashScreen = () => {
             />
           </div>
         </div>
+        <AnimatePresence>
+          {progress >= 100 && (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mt-6 text-base md:text-lg font-semibold text-amber-200 tracking-wide"
+            >
+              Welcome to ONEMSU
+            </motion.p>
+          )}
+        </AnimatePresence>
       </motion.div>
       
       {/* Data Stream Particles */}
@@ -669,18 +689,11 @@ export default function App() {
     }
     return 'home';
   });
+  const viewRef = useRef(view);
+
 
   useEffect(() => {
-    if (!showSplash) return;
-
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3500);
-
-    return () => clearTimeout(timer);
-  }, [showSplash]);
-
-  useEffect(() => {
+    viewRef.current = view;
     localStorage.setItem('onemsu_view', view);
     if (typeof window !== 'undefined' && window.location.hash !== `#${view}`) {
       window.history.replaceState(null, '', `#${view}`);
@@ -701,6 +714,7 @@ export default function App() {
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
   const [showCampusModal, setShowCampusModal] = useState(false);
   const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
+  const [showCampusDirectory, setShowCampusDirectory] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -970,6 +984,7 @@ export default function App() {
     if (view === 'explorer' && selectedCampus) {
       setActiveCampusSlug(selectedCampus.slug);
     }
+    if (view === 'explorer') setShowCampusDirectory(true);
   }, [view, selectedCampus]);
 
   useEffect(() => {
@@ -1351,9 +1366,24 @@ export default function App() {
       return;
     }
 
-    if (!socketRef.current) {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      try {
+        const res = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senderId: user.id, senderName: user.name, content: text, roomId: activeRoom, mediaUrl, mediaType })
+        }).then(safeJson);
+
+        if (res.success && res.message) {
+          setMessages(prev => [...prev, res.message]);
+          setTimeout(() => {
+            virtuosoRef.current?.scrollToIndex({ index: 'last', align: 'end', behavior: 'smooth' });
+          }, 50);
+        }
+      } finally {
         setIsSending(false);
-        return;
+      }
+      return;
     }
 
     // Create a clientId so we can remove the optimistic copy when server echoes back
@@ -1744,29 +1774,53 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-full w-full bg-[#0a0502] p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
+    <div className="h-full w-full royal-shell p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-7xl mx-auto pb-20">
-        <header className="flex justify-between items-center mb-12">
+        <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8 rounded-3xl royal-panel backdrop-blur-sm p-6">
           <div className="flex items-center gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'MSUan'}!</h2>
-              <p className="text-gray-500 text-sm">Connected to {user?.email || 'Unified System'}</p>
+              <p className="text-gray-300/80 text-sm">Connected to {user?.email || 'Unified System'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={handleLogout}
-              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors text-sm font-medium"
+              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white transition-colors text-sm font-medium"
             >
               Sign Out
             </button>
           </div>
         </header>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-amber-200/80">Unread Chats</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{messengerUnread}</p>
+              <MessageCircle className="text-amber-300" size={18} />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80">Campus Updates</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{updatesUnread}</p>
+              <Bell className="text-sky-300" size={18} />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-200/80">Community Groups</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{groups.length}</p>
+              <Users className="text-emerald-300" size={18} />
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar (Special Features) */}
           <div className="lg:col-span-1 space-y-8 order-2 lg:order-1">
-            <div className="card-gold p-6 rounded-3xl relative overflow-hidden group cursor-pointer" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
+            <div className="p-6 rounded-3xl relative overflow-hidden group cursor-pointer border border-indigo-400/30 bg-gradient-to-br from-slate-900 to-indigo-950/70" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -1790,40 +1844,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card-gold p-6 rounded-3xl">
-              <h3 className="font-bold mb-4 flex items-center gap-2"><Globe size={18} className="text-amber-500" /> Campus Information</h3>
-              <div className="space-y-3">
-                {CAMPUSES.map((c) => (
-                  <div key={c.slug} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-500/30 transition-all group">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 shrink-0 rounded-xl overflow-hidden shadow-lg">
-                        <CampusLogo slug={c.slug} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
-                          <button 
-                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
-                            className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
-                          >
-                            About
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1 mb-2">
-                          <MapPin size={10} /> {c.location}
-                        </div>
-                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                          {c.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="card-gold p-6 rounded-3xl">
-              <h3 className="font-bold mb-4">Navigation & Quick Actions</h3>
+            <div className="p-6 rounded-3xl border border-amber-300/20 bg-[#0f1014]/85 backdrop-blur-md shadow-2xl sticky bottom-4 z-20">
+              <h3 className="font-bold mb-4 text-amber-100">Navigation & Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: 'Messenger', icon: <MessageCircle size={14} />, action: () => setView('messenger'), unread: messengerUnread },
@@ -1831,6 +1853,7 @@ export default function App() {
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
                   { name: 'Profile', icon: <Users size={14} />, action: () => setView('profile') },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
+                  { name: 'Community Groups', icon: <Users size={14} />, action: () => setView('messenger') },
                   { name: 'Lost & Found', icon: <Search size={14} />, action: () => setView('lostfound') },
                   { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
                   { name: 'Library', icon: <BookOpen size={14} />, action: () => window.open('https://openlibrary.org', '_blank') },
@@ -1875,13 +1898,13 @@ export default function App() {
 
           {/* Main Feed */}
           <div className="lg:col-span-3 space-y-8 order-1 lg:order-2">
-            <div className="card-gold p-8 rounded-3xl">
+            <div className="p-8 rounded-3xl border border-amber-400/30 bg-gradient-to-r from-[#16110a] to-[#1d202f] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Sparkles className="text-amber-500" size={20} /> Confession Wall
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {freedomPosts.slice(0, 5).map((p) => (
-                  <div key={p.id} className={`rounded-2xl overflow-hidden bg-white/5 border border-white/10 ${freedomPosts.indexOf(p) === 0 ? 'md:col-span-2' : ''}`}>
+                  <div key={p.id} className={`rounded-2xl overflow-hidden bg-black/40 border border-white/10 ${freedomPosts.indexOf(p) === 0 ? 'md:col-span-2' : ''}`}>
                     {p.image_url && <img src={p.image_url} alt="" className={`${freedomPosts.indexOf(p) === 0 ? 'h-48' : 'h-32'} w-full object-cover`} />}
                     <div className="p-4">
                       <div className="flex justify-between items-center">
@@ -1903,122 +1926,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-              <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold flex items-center gap-2"><Users size={18} className="text-amber-500" /> Community Groups</h4>
-                  <button
-                    onClick={() => setDashboardCreateOpen(v => !v)}
-                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-300 hover:bg-white/20"
-                  >
-                    {dashboardCreateOpen ? 'Close' : 'Create'}
-                  </button>
-                </div>
-                {dashboardCreateOpen && (
-                  <div className="mb-4 space-y-2">
-                    <input
-                      value={newGroup.name}
-                      onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                      placeholder="Group name"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
-                    />
-                    <select
-                      value={newGroup.campus}
-                      onChange={(e) => setNewGroup({ ...newGroup, campus: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
-                    >
-                      <option value="" className="bg-[#0a0502]">Select campus</option>
-                      {CAMPUSES.map(c => (
-                        <option key={c.slug} value={c.name} className="bg-[#0a0502]">{c.name}</option>
-                      ))}
-                    </select>
-                    <textarea
-                      value={newGroup.description}
-                      onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                      placeholder="Description (optional)"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
-                      rows={2}
-                    />
-                    <div className="flex items-center gap-3">
-                      <label className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 cursor-pointer w-fit">
-                        Upload logo
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) { setNewGroup({ ...newGroup, logoPreview: '' }); return; }
-                            const reader = new FileReader();
-                            reader.onload = () => setNewGroup({ ...newGroup, logoPreview: reader.result as string });
-                            reader.readAsDataURL(file);
-                          }}
-                          className="hidden"
-                        />
-                      </label>
-                      {newGroup.logoPreview ? <span className="text-xs text-amber-400">Logo attached</span> : <span className="text-xs text-gray-500">Optional</span>}
-                    </div>
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!newGroup.name || !newGroup.campus || dashboardCreating) return;
-                          setDashboardCreating(true);
-                          try {
-                            let logoUrl: string | undefined;
-                            if (newGroup.logoPreview) {
-                              const up = await fetch('/api/upload', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ dataUrl: newGroup.logoPreview })
-                              }).then(safeJson);
-                              if (up.success) logoUrl = up.url;
-                            }
-                            const res = await fetch('/api/groups', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ name: newGroup.name, description: newGroup.description, campus: newGroup.campus, logoUrl })
-                            }).then(safeJson);
-                            if (res.success) {
-                              setGroups((prev) => [res.group, ...prev]);
-                              setNewGroup({ name: '', description: '', campus: '', logoPreview: '' });
-                              setDashboardCreateOpen(false);
-                            }
-                          } finally {
-                            setDashboardCreating(false);
-                          }
-                        }}
-                        disabled={!newGroup.name || !newGroup.campus || dashboardCreating}
-                        aria-busy={dashboardCreating}
-                        className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
-                      >
-                        {dashboardCreating ? 'Creating…' : 'Create Group'}
-                      </button>
-                    </div>
-                    <div className="h-px w-full bg-white/10" />
-                  </div>
-                )}
-                <div className="space-y-3">
-                  {loadingGroups && <div className="text-sm text-gray-500">Loading groups...</div>}
-                  {!loadingGroups && groups.length === 0 && <div className="text-sm text-gray-500">No groups found.</div>}
-                  {!loadingGroups && groups.map(group => (
-                    <div key={group.id} className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
-                      <div>
-                        <span className="text-sm">{group.name}</span>
-                        <span className="block text-[10px] text-gray-500">{group.campus}</span>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          setActiveRoom(group.name.toLowerCase().replace(/\s+/g, '-'));
-                          setView('messenger');
-                        }}
-                        className="text-amber-500 hover:text-amber-400 text-xs"
-                      >
-                        Join
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="rounded-2xl border border-amber-500/20 bg-black/30 p-4 text-xs text-gray-300">
+              Community Groups are now in the floating Quick Actions panel for easier access on mobile and desktop.
             </div>
           </div>
         </div>
@@ -2437,9 +2346,9 @@ export default function App() {
     const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
-      <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
+      <div className="h-[100dvh] w-full royal-shell flex md:flex-row overflow-hidden">
         {/* Sidebar - Campus List */}
-        <div className="w-full md:w-80 border-r border-white/5 flex flex-col shrink-0 bg-black/40 backdrop-blur-md">
+        <div className={`w-full md:w-80 border-r border-amber-400/15 ${showCampusDirectory ? 'flex' : 'hidden'} md:flex flex-col shrink-0 bg-[#0c1018]/95 backdrop-blur-md`}>
           <div className="p-6 border-b border-white/5">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold text-white">MSU <span className="text-amber-500">System</span></h2>
@@ -2451,7 +2360,7 @@ export default function App() {
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setActiveCampusSlug(campus.slug)}
+                onClick={() => { setActiveCampusSlug(campus.slug); setShowCampusDirectory(false); }}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2467,7 +2376,10 @@ export default function App() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto scrollbar-hide bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95">
+        <div className={`flex-1 ${showCampusDirectory ? 'hidden md:flex' : 'flex'} flex-col min-w-0 overflow-hidden bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95`}>
+          <div className="md:hidden p-3 border-b border-white/10 bg-black/40 sticky top-0 z-20">
+            <button onClick={() => setShowCampusDirectory(true)} className="px-3 py-2 rounded-lg text-xs font-bold bg-amber-500 text-black">All Campuses</button>
+          </div>
           {/* Cover Area */}
           <div className="relative h-64 md:h-80 shrink-0 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0502]" />
@@ -2508,16 +2420,15 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => {
-                    setSelectedCampus(activeCampus);
-                    setShowCampusModal(true);
+                    window.open(activeCampus.website, '_blank', 'noopener,noreferrer');
                   }}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
                 >
-                  View Details
+                  Campus Snapshot
                 </button>
                 <button
                   onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
+                  className="px-6 py-2.5 rounded-xl royal-accent text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
                 >
                   3D Campus Map
                 </button>
@@ -2526,100 +2437,45 @@ export default function App() {
           </div>
 
           {/* Content Grid */}
-          <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-8 p-8 max-w-7xl mx-auto w-full">
-            {/* Left: Stats & Info */}
-            <div className="xl:col-span-4 space-y-8">
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Campus Overview</h3>
-                <p className="text-gray-300 text-sm leading-relaxed mb-8 font-medium italic">
-                  "{activeCampus.description}"
-                </p>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Student Population</p>
-                      <p className="text-2xl font-black text-white">{activeCampus.stats.students}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <Users size={24} />
-                    </div>
+          <div className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full overflow-hidden">
+            <div className="h-full grid grid-cols-1 xl:grid-cols-3 gap-4">
+              <section className="royal-panel rounded-3xl p-5 xl:col-span-1 overflow-hidden">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-amber-300/80 mb-3">Campus Overview</h3>
+                <p className="text-gray-200 text-sm leading-relaxed line-clamp-5 mb-4">{activeCampus.description}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-black/25 border border-white/10 p-3">
+                    <p className="text-[10px] uppercase text-gray-400">Students</p>
+                    <p className="text-xl font-black text-white">{activeCampus.stats.students}</p>
                   </div>
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Academic Programs</p>
-                      <p className="text-2xl font-black text-white">{activeCampus.stats.courses}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <BookOpen size={24} />
-                    </div>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Faculty Members</p>
-                      <p className="text-2xl font-black text-white">850+</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <ShieldCheck size={24} />
-                    </div>
+                  <div className="rounded-xl bg-black/25 border border-white/10 p-3">
+                    <p className="text-[10px] uppercase text-gray-400">Programs</p>
+                    <p className="text-xl font-black text-white">{activeCampus.stats.courses}</p>
                   </div>
                 </div>
-              </section>
-
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Official Channels</h3>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Chancellor\'s Office', icon: <ShieldCheck size={16} /> },
-                    { name: 'Registrar Updates', icon: <Bell size={16} /> },
-                    { name: 'Student Council', icon: <Users size={16} /> },
-                    { name: 'Campus Security', icon: <ShieldCheck size={16} /> }
-                  ].map(channel => (
-                    <button key={channel.name} className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group">
-                      <div className="flex items-center gap-3">
-                        <span className="text-amber-500 group-hover:scale-110 transition-transform">{channel.icon}</span>
-                        <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{channel.name}</span>
-                      </div>
-                      <ChevronRight size={14} className="text-gray-600 group-hover:text-amber-500 transition-colors" />
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Reliable Sources</h3>
-                <div className="space-y-3">
-                  {activeCampus.sources.map((source) => (
-                    <a
-                      key={source.url}
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group"
-                    >
-                      <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{source.label}</span>
-                      <ExternalLink size={14} className="text-gray-500 group-hover:text-amber-500" />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {activeCampus.sources.slice(0, 3).map((source) => (
+                    <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full text-[11px] bg-white/5 border border-white/10 hover:border-amber-400/40">
+                      {source.label}
                     </a>
                   ))}
                 </div>
               </section>
-            </div>
 
-            {/* Right: Timeline */}
-            <div className="xl:col-span-8 space-y-8">
-              <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
-                    <MessageSquare className="text-amber-500" size={24} /> 
-                    Campus <span className="text-amber-500">Timeline</span>
-                  </h3>
-                  <div className="flex gap-2">
-                    <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Search size={18} /></button>
-                    <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Bell size={18} /></button>
-                  </div>
+              <section className="royal-panel rounded-3xl p-5 xl:col-span-2 overflow-hidden">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-black text-white flex items-center gap-2"><MessageSquare className="text-amber-400" size={18} /> Campus Timeline</h3>
+                  <button onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')} className="px-3 py-1.5 rounded-lg royal-accent text-xs font-bold">3D Map</button>
                 </div>
-                <CampusTimeline campus={activeCampus} />
-              </div>
+                <div className="space-y-3 max-h-[48vh] overflow-auto scrollbar-hide pr-1">
+                  {(CAMPUS_TIMELINES[activeCampus.slug] || CAMPUS_TIMELINES.default).slice(0, 6).map((event, idx) => (
+                    <div key={`${activeCampus.slug}-${event.year}-${idx}`} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-300">{event.year}</p>
+                      <p className="text-sm font-semibold text-white mt-1">{event.title}</p>
+                      <p className="text-xs text-gray-300 line-clamp-2 mt-1">{event.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -3924,6 +3780,55 @@ export default function App() {
     }, 2000);
   };
 
+  const reactToMessage = async (messageId: number | string, reaction: string) => {
+    if (!user || !messageId || String(messageId).startsWith('local-')) return;
+
+    const target = messages.find(m => String(m.id) === String(messageId));
+    const nextReaction = target?.user_reaction === reaction ? '' : reaction;
+
+    const res = await fetch(`/api/messages/${messageId}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, reaction: nextReaction })
+    }).then(safeJson);
+
+    if (res.success) {
+      setMessages(prev => prev.map(m => String(m.id) === String(messageId)
+        ? { ...m, reaction_count: res.reaction_count, user_reaction: res.user_reaction }
+        : m
+      ));
+    }
+  };
+
+
+  const extractFirstUrl = (text?: string) => {
+    if (!text) return null;
+    const match = text.match(/https?:\/\/[^\s]+/i);
+    return match ? match[0] : null;
+  };
+
+  const renderLinkPreview = (messageText?: string) => {
+    const url = extractFirstUrl(messageText);
+    if (!url) return null;
+
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-[#13161e] p-2 hover:border-amber-300 transition-colors"
+      >
+        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500/30 to-yellow-200/20 border border-amber-300/40 p-1 shrink-0">
+          <Logo />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-amber-200">ONEMSU</p>
+          <p className="text-[10px] text-gray-300 truncate">{url}</p>
+        </div>
+      </a>
+    );
+  };
+
   const renderMessenger = () => {
     // Determine the other participant in a DM
     let otherParticipantId: number | null = null;
@@ -3942,7 +3847,7 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-[100dvh] bg-[#0a0502] flex flex-col md:flex-row overflow-hidden text-gray-200">
+    <div className="h-[100dvh] royal-shell flex flex-col md:flex-row overflow-hidden text-gray-200">
       {/* Sidebar */}
       <div className={`
         flex flex-col shrink-0 border-r border-white/5 transition-all duration-300
@@ -4380,12 +4285,28 @@ export default function App() {
                                   {mType?.startsWith('video') ? <video src={mUrl} controls className="w-full" /> : <img src={mUrl} alt="" className="w-full object-cover" />}
                                 </div>
                               )}
+                              {renderLinkPreview((m as any).content)}
                             </div>
                             {showTimestamps && isLastInChain && (
                               <span className={`text-[9px] text-gray-500 px-1 ${isMe ? 'text-right' : 'text-left'} w-full flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 {new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                               </span>
                             )}
+                            <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'} flex-wrap`}>
+                              {['👍', '❤️', '🔥'].map((emoji) => (
+                                <button
+                                  key={`${m.id}-${emoji}`}
+                                  onClick={() => reactToMessage(m.id, emoji)}
+                                  className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${m.user_reaction === emoji ? 'bg-amber-400/90 text-black border-amber-300' : 'bg-white/5 text-gray-300 border-white/10 hover:border-amber-400/50'}`}
+                                  type="button"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                              {(m.reaction_count ?? 0) > 0 && (
+                                <span className="text-[10px] text-amber-300 px-2">{m.user_reaction || '💬'} {(m.reaction_count ?? 0)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -4620,7 +4541,7 @@ export default function App() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="fixed inset-0 z-[9999]"
           >
-            <SplashScreen />
+            <SplashScreen onComplete={() => setShowSplash(false)} />
           </motion.div>
         )}
       </AnimatePresence>
