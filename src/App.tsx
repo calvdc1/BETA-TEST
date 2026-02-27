@@ -651,12 +651,19 @@ const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, class
 };
 
 export default function App() {
+  const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound', 'scheduler'] as const;
+  const getViewFromHash = () => {
+    if (typeof window === 'undefined') return null;
+    const hashView = window.location.hash.replace('#', '').trim();
+    return validViews.includes(hashView as any) ? (hashView as typeof validViews[number]) : null;
+  };
   const [showSplash, setShowSplash] = useState(true);
   const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound' | 'scheduler'>(() => {
     if (typeof window !== 'undefined') {
+      const hashView = getViewFromHash();
+      if (hashView) return hashView;
       const saved = localStorage.getItem('onemsu_view');
-      const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound', 'scheduler'];
-      if (saved && validViews.includes(saved)) {
+      if (saved && validViews.includes(saved as any)) {
         return saved as any;
       }
     }
@@ -675,6 +682,25 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('onemsu_view', view);
+    if (typeof window !== 'undefined' && window.location.hash !== `#${view}`) {
+      window.history.replaceState(null, '', `#${view}`);
+    }
+  }, [view]);
+
+  const viewRef = useRef(view);
+  useEffect(() => {
+    viewRef.current = view;
+  }, [view]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hashView = getViewFromHash();
+      if (hashView && hashView !== view) {
+        setView(hashView);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
@@ -714,6 +740,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('onemsu_room', activeRoom);
   }, [activeRoom]);
+  const activeRoomRef = useRef(activeRoom);
+  useEffect(() => {
+    activeRoomRef.current = activeRoom;
+  }, [activeRoom]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
@@ -749,7 +779,6 @@ export default function App() {
   const [profileEditing, setProfileEditing] = useState(false);
   const [toast, setToast] = useState<{ message: string; roomId: string } | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const processedMessageIds = useRef<Set<string>>(new Set());
   const pendingClientIds = useRef<Set<string>>(new Set());
   const [isInVoice, setIsInVoice] = useState(false);
   const [voicePeers, setVoicePeers] = useState<string[]>([]);
@@ -994,7 +1023,7 @@ export default function App() {
       socketRef.current = socket;
 
       socket.onopen = () => {
-        socket.send(JSON.stringify({ type: 'join', userId: user.id, roomId: activeRoom }));
+        socket.send(JSON.stringify({ type: 'join', userId: user.id, roomId: activeRoomRef.current }));
       };
 
       socket.onmessage = async (event) => {
@@ -1007,19 +1036,7 @@ export default function App() {
             pendingClientIds.current.delete(String(msg.clientId));
             setMessages(prev => prev.filter(m => (m as any).clientId !== msg.clientId));
           } else if (msg.sender_id === user.id && !msg.clientId) {
-             // If message from self but no clientId (e.g. from another tab), check if we have a matching optimistic message
-             // This is tricky because timestamps might differ slightly.
-             // We'll rely on the fact that if we sent it from this tab, we attached a clientId.
-             // If we receive a message from ourselves without a clientId, it must be from another session/tab, so we keep it.
-             // HOWEVER, the server might not be echoing back the clientId if we didn't update the server code to do so.
-             // Let's check if the message content matches any pending optimistic message
              setMessages(prev => {
-                // If we have an optimistic message with same content and very recent, we might want to replace it
-                // But better is to ensure server echoes clientId.
-                // If server doesn't echo clientId, we have a problem: duplication.
-                
-                // Temporary fix: if we see a message from ourselves that matches the content of the last message in the list
-                // and the last message was optimistic (has clientId), then replace it.
                 const lastMsg = prev[prev.length - 1];
                 if (lastMsg && (lastMsg as any).clientId && lastMsg.content === msg.content && lastMsg.sender_id === msg.sender_id) {
                    return [...prev.slice(0, -1), msg];
@@ -1028,17 +1045,16 @@ export default function App() {
              });
           }
 
-          // De-dupe by id
           const msgId = String(msg.id);
-          if (processedMessageIds.current.has(msgId)) return;
-          processedMessageIds.current.add(msgId);
 
-          const isInCorrectView = (view === 'messenger' || view === 'newsfeed' || view === 'explorer');
-          const isCurrentRoom = (msg.roomId === activeRoom);
+          const currentView = viewRef.current;
+          const currentRoom = activeRoomRef.current;
+          const isInCorrectView = (currentView === 'messenger' || currentView === 'newsfeed' || currentView === 'explorer');
+          const isCurrentRoom = (msg.roomId === currentRoom);
 
           if (isCurrentRoom && isInCorrectView) {
             setMessages(prev => {
-              if (prev.some(m => String((m as any).id) === msgId)) return prev;
+              if (prev.some(m => String((m as any).id) === msgId || ((m as any).clientId && (m as any).clientId === msg.clientId))) return prev;
               return [...prev, msg];
             });
           } else {
@@ -1092,7 +1108,12 @@ export default function App() {
         socket.close();
       };
     }
-  }, [isLoggedIn, user, activeRoom]);
+  }, [isLoggedIn, user]);
+
+  useEffect(() => {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN || !user) return;
+    socketRef.current.send(JSON.stringify({ type: 'join', userId: user.id, roomId: activeRoom }));
+  }, [activeRoom, user]);
 
   const sendSeen = () => {
     if (!socketRef.current || !user || !activeRoom) return;
@@ -1807,27 +1828,26 @@ export default function App() {
             </div>
 
             <div className="card-gold p-6 rounded-3xl">
-              <h3 className="font-bold mb-4">Quick Actions</h3>
+              <h3 className="font-bold mb-4">Navigation & Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: 'Messenger', icon: <MessageCircle size={14} />, action: () => setView('messenger'), unread: messengerUnread },
-                  { name: 'Lost & Found', icon: <Search size={14} />, action: () => setView('lostfound') },
-                  { name: 'Library', icon: <BookOpen size={14} />, action: () => window.open('https://openlibrary.org', '_blank') },
-                  { name: 'Grades', icon: <Sparkles size={14} /> },
-                  { name: 'Finance', icon: <ShieldCheck size={14} /> },
-                  { name: 'Discord', icon: <ExternalLink size={14} />, action: () => window.open('https://discord.gg/gjuygmrPnR', '_blank') },
+                  { name: 'Newsfeed', icon: <MessageSquare size={14} />, action: () => setView('newsfeed'), unread: updatesUnread },
+                  { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
                   { name: 'Profile', icon: <Users size={14} />, action: () => setView('profile') },
+                  { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
+                  { name: 'Lost & Found', icon: <Search size={14} />, action: () => setView('lostfound') },
+                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
+                  { name: 'Library', icon: <BookOpen size={14} />, action: () => window.open('https://openlibrary.org', '_blank') },
+                  { name: 'Streaming', icon: <Monitor size={14} />, action: () => window.open('https://www.youtube.com/live', '_blank') },
+                  { name: 'TikTok', icon: <Video size={14} />, action: () => window.open('https://www.tiktok.com/', '_blank') },
+                  { name: 'Spotify', icon: <ExternalLink size={14} />, action: () => window.open('https://open.spotify.com/', '_blank') },
+                  { name: 'Discord', icon: <ExternalLink size={14} />, action: () => window.open('https://discord.gg/gjuygmrPnR', '_blank') },
                   { name: 'Scheduler', icon: <Clock size={14} />, action: () => setView('scheduler') },
-                  { name: 'Quick Note', icon: <BookOpen size={14} />, action: () => {
+                  { name: 'Quick Note', icon: <StickyNote size={14} />, action: () => {
                     const id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
                     setStickyNotes(prev => [{ id, content: '', color: 'bg-amber-500/20 border-amber-500/30', createdAt: new Date().toISOString() }, ...prev]);
-                  } },
-                  { name: 'Updates', icon: <MessageSquare size={14} />, action: () => setView('newsfeed'), unread: updatesUnread },
-                  { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
-                  { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
-                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
-                  { name: 'Notes', icon: <StickyNote size={14} />, action: () => document.getElementById('notes-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
-                  { name: 'Scheduler', icon: <CalendarDays size={14} />, action: () => document.getElementById('scheduler-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
+                  } }
                 ].map(item => (
                   <button 
                     key={item.name} 
@@ -1854,100 +1874,7 @@ export default function App() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div id="notes-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold flex items-center gap-2"><BookOpen size={18} className="text-amber-500" /> Notes</h4>
-                <button
-                  onClick={() => {
-                    const palette = [
-                      'bg-amber-500/20 border-amber-500/30',
-                      'bg-rose-500/20 border-rose-500/30',
-                      'bg-emerald-500/20 border-emerald-500/30',
-                      'bg-sky-500/20 border-sky-500/30',
-                      'bg-purple-500/20 border-purple-500/30'
-                    ];
-                    const id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-                    const color = palette[Math.floor(Math.random() * palette.length)];
-                    setStickyNotes(prev => [{ id, content: '', color, createdAt: new Date().toISOString() }, ...prev]);
-                  }}
-                  className="p-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20"
-                  title="Add note"
-                  aria-label="Add note"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {stickyNotes.length === 0 ? (
-                <p className="text-sm text-gray-500">No notes yet. Use + to create a sticky note.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto scrollbar-hide">
-                  {stickyNotes.slice(0, 4).map(n => (
-                    <div key={n.id} className={`p-3 rounded-2xl border ${n.color} transition-all hover:scale-[1.02]`}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] text-white/60 font-medium">{new Date(n.createdAt).toLocaleDateString()}</span>
-                        <button
-                          className="text-xs text-white/60 hover:text-white transition-colors"
-                          onClick={() => setStickyNotes(prev => prev.filter(x => x.id !== n.id))}
-                          title="Delete note"
-                          aria-label="Delete note"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                      <textarea
-                        value={n.content}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          setStickyNotes(prev => prev.map(x => x.id === n.id ? { ...x, content: v } : x));
-                        }}
-                        placeholder="Write a note…"
-                        className="w-full h-28 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none resize-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div id="scheduler-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold flex items-center gap-2"><CalendarDays size={18} className="text-amber-500" /> Scheduler</h4>
-                <button
-                  onClick={() => setSchedulerItems(prev => [{ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: 'New Schedule', date: new Date().toISOString().slice(0, 10), note: '' }, ...prev])}
-                  className="p-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20"
-                  title="Add schedule"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-hide">
-                {schedulerItems.length === 0 && <p className="text-sm text-gray-500">No schedules yet. Add one from Quick Actions.</p>}
-                {schedulerItems.map(item => (
-                  <div key={item.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
-                    <input
-                      value={item.title}
-                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, title: e.target.value } : x))}
-                      className="w-full mb-2 bg-transparent text-sm font-semibold text-white outline-none"
-                      placeholder="Schedule title"
-                    />
-                    <input
-                      type="date"
-                      value={item.date}
-                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, date: e.target.value } : x))}
-                      className="w-full mb-2 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-200"
-                    />
-                    <textarea
-                      rows={2}
-                      value={item.note}
-                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, note: e.target.value } : x))}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-300"
-                      placeholder="Notes"
-                    />
-                  </div>
-                ))}
-              </div>
+              <p className="text-[11px] text-gray-400 mt-4">Scheduler and Notes are still available from these quick actions but hidden from the main dashboard cards.</p>
             </div>
           </div>
 
