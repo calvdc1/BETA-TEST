@@ -128,3 +128,22 @@ body {
   scrollbar-width: none;
 }
 
+
+
+.royal-shell {
+  background:
+    radial-gradient(90% 120% at 10% 0%, rgba(212,175,55,0.20), transparent 45%),
+    radial-gradient(80% 100% at 100% 10%, rgba(66,76,102,0.34), transparent 48%),
+    linear-gradient(165deg, #090b12 0%, #0f1320 45%, #161d2a 100%);
+}
+
+.royal-panel {
+  background: linear-gradient(150deg, rgba(19,23,34,0.95), rgba(16,18,26,0.92));
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.royal-accent {
+  background: linear-gradient(120deg, #d4af37, #f2dc8b);
+  color: #111;
+}

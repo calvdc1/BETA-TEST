@@ -2574,7 +2574,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
+                  className="px-6 py-2.5 rounded-xl royal-accent text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
                 >
                   3D Campus Map
                 </button>
@@ -2583,100 +2583,45 @@ export default function App() {
           </div>
 
           {/* Content Grid */}
-          <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-8 p-8 max-w-7xl mx-auto w-full">
-            {/* Left: Stats & Info */}
-            <div className="xl:col-span-4 space-y-8">
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Campus Overview</h3>
-                <p className="text-gray-300 text-sm leading-relaxed mb-8 font-medium italic">
-                  "{activeCampus.description}"
-                </p>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Student Population</p>
-                      <p className="text-2xl font-black text-white">{activeCampus.stats.students}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <Users size={24} />
-                    </div>
+          <div className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full overflow-hidden">
+            <div className="h-full grid grid-cols-1 xl:grid-cols-3 gap-4">
+              <section className="royal-panel rounded-3xl p-5 xl:col-span-1 overflow-hidden">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-amber-300/80 mb-3">Campus Overview</h3>
+                <p className="text-gray-200 text-sm leading-relaxed line-clamp-5 mb-4">{activeCampus.description}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-black/25 border border-white/10 p-3">
+                    <p className="text-[10px] uppercase text-gray-400">Students</p>
+                    <p className="text-xl font-black text-white">{activeCampus.stats.students}</p>
                   </div>
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Academic Programs</p>
-                      <p className="text-2xl font-black text-white">{activeCampus.stats.courses}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <BookOpen size={24} />
-                    </div>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-amber-500/30 transition-all">
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Faculty Members</p>
-                      <p className="text-2xl font-black text-white">850+</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                      <ShieldCheck size={24} />
-                    </div>
+                  <div className="rounded-xl bg-black/25 border border-white/10 p-3">
+                    <p className="text-[10px] uppercase text-gray-400">Programs</p>
+                    <p className="text-xl font-black text-white">{activeCampus.stats.courses}</p>
                   </div>
                 </div>
-              </section>
-
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Official Channels</h3>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Chancellor\'s Office', icon: <ShieldCheck size={16} /> },
-                    { name: 'Registrar Updates', icon: <Bell size={16} /> },
-                    { name: 'Student Council', icon: <Users size={16} /> },
-                    { name: 'Campus Security', icon: <ShieldCheck size={16} /> }
-                  ].map(channel => (
-                    <button key={channel.name} className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group">
-                      <div className="flex items-center gap-3">
-                        <span className="text-amber-500 group-hover:scale-110 transition-transform">{channel.icon}</span>
-                        <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{channel.name}</span>
-                      </div>
-                      <ChevronRight size={14} className="text-gray-600 group-hover:text-amber-500 transition-colors" />
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Reliable Sources</h3>
-                <div className="space-y-3">
-                  {activeCampus.sources.map((source) => (
-                    <a
-                      key={source.url}
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group"
-                    >
-                      <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{source.label}</span>
-                      <ExternalLink size={14} className="text-gray-500 group-hover:text-amber-500" />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {activeCampus.sources.slice(0, 3).map((source) => (
+                    <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full text-[11px] bg-white/5 border border-white/10 hover:border-amber-400/40">
+                      {source.label}
                     </a>
                   ))}
                 </div>
               </section>
-            </div>
 
-            {/* Right: Timeline */}
-            <div className="xl:col-span-8 space-y-8">
-              <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
-                    <MessageSquare className="text-amber-500" size={24} /> 
-                    Campus <span className="text-amber-500">Timeline</span>
-                  </h3>
-                  <div className="flex gap-2">
-                    <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Search size={18} /></button>
-                    <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Bell size={18} /></button>
-                  </div>
+              <section className="royal-panel rounded-3xl p-5 xl:col-span-2 overflow-hidden">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-black text-white flex items-center gap-2"><MessageSquare className="text-amber-400" size={18} /> Campus Timeline</h3>
+                  <button onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')} className="px-3 py-1.5 rounded-lg royal-accent text-xs font-bold">3D Map</button>
                 </div>
-                <CampusTimeline campus={activeCampus} />
-              </div>
+                <div className="space-y-3 max-h-[48vh] overflow-auto scrollbar-hide pr-1">
+                  {(CAMPUS_TIMELINES[activeCampus.slug] || CAMPUS_TIMELINES.default).slice(0, 6).map((event, idx) => (
+                    <div key={`${activeCampus.slug}-${event.year}-${idx}`} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-300">{event.year}</p>
+                      <p className="text-sm font-semibold text-white mt-1">{event.title}</p>
+                      <p className="text-xs text-gray-300 line-clamp-2 mt-1">{event.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         </div>
