@@ -202,6 +202,11 @@ try { db.exec(`ALTER TABLE users ADD COLUMN year_level TEXT`); } catch {}
 try { db.exec(`ALTER TABLE users ADD COLUMN department TEXT`); } catch {}
 try { db.exec(`ALTER TABLE users ADD COLUMN bio TEXT`); } catch {}
 try { db.exec(`ALTER TABLE users ADD COLUMN cover_photo TEXT`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_room_timestamp ON messages(room_id, timestamp DESC)`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_sender_room ON messages(sender_id, room_id)`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_deleted_messages_user_message ON deleted_messages(user_id, message_id)`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_presence_last_seen ON presence(last_seen)`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_group_members_user_group ON group_members(user_id, group_id)`); } catch {}
 const groupsCount = db.prepare("SELECT COUNT(*) AS c FROM groups").get() as { c: number };
 if (!groupsCount.c) {
   const stmt = db.prepare("INSERT INTO groups (name, description, campus) VALUES (?, ?, ?)");
@@ -476,27 +481,41 @@ async function startServer() {
 
   app.get("/api/messenger/recent-dms", (req, res) => {
     const userId = Number(req.query.userId);
-    const rows = db.prepare(`
-      SELECT DISTINCT 
-        CASE WHEN sender_id = ? THEN room_id ELSE room_id END as room,
-        CASE WHEN sender_id = ? THEN room_id ELSE room_id END as partner_id
-      FROM messages 
-      WHERE room_id LIKE 'dm-%' AND (sender_id = ? OR room_id LIKE '%-' || ? OR room_id LIKE 'dm-' || ? || '-%')
-      ORDER BY timestamp DESC LIMIT 20
-    `).all(userId, userId, userId, userId, userId);
-    
-    // Better query to get unique partners
-    const partners = db.prepare(`
-      SELECT DISTINCT u.id, u.name, u.avatar, u.campus
-      FROM users u
-      JOIN messages m ON (
-        (m.room_id LIKE 'dm-' || ? || '-%' AND u.id = CAST(SUBSTR(m.room_id, INSTR(m.room_id, '-') + INSTR(SUBSTR(m.room_id, INSTR(m.room_id, '-') + 1), '-') + 1) AS INTEGER))
-        OR 
-        (m.room_id LIKE 'dm-%-' || ? AND u.id = CAST(SUBSTR(m.room_id, INSTR(m.room_id, '-') + 1, INSTR(SUBSTR(m.room_id, INSTR(m.room_id, '-') + 1), '-') - 1) AS INTEGER))
-      )
-      WHERE u.id != ?
-    `).all(userId, userId, userId);
+    if (!Number.isFinite(userId)) return res.status(400).json({ success: false, message: "Missing userId" });
 
+    const recentRooms = db.prepare(`
+      SELECT room_id
+      FROM messages
+      WHERE room_id LIKE 'dm-%' AND (room_id LIKE 'dm-' || ? || '-%' OR room_id LIKE 'dm-%-' || ?)
+      ORDER BY timestamp DESC
+      LIMIT 200
+    `).all(userId, userId) as { room_id: string }[];
+
+    const partnerIds: number[] = [];
+    const seen = new Set<number>();
+    for (const row of recentRooms) {
+      const parts = row.room_id.split("-");
+      if (parts.length !== 3) continue;
+      const a = Number(parts[1]);
+      const b = Number(parts[2]);
+      const partnerId = a === userId ? b : (b === userId ? a : null);
+      if (!partnerId || seen.has(partnerId)) continue;
+      seen.add(partnerId);
+      partnerIds.push(partnerId);
+      if (partnerIds.length >= 20) break;
+    }
+
+    if (!partnerIds.length) return res.json([]);
+
+    const placeholders = partnerIds.map(() => "?").join(",");
+    const partners = db.prepare(`
+      SELECT id, name, avatar, campus
+      FROM users
+      WHERE id IN (${placeholders})
+    `).all(...partnerIds) as { id: number; name: string; avatar?: string; campus: string }[];
+
+    const order = new Map(partnerIds.map((id, idx) => [id, idx]));
+    partners.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
     res.json(partners);
   });
 
@@ -638,7 +657,16 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(__dirname, "dist")));
+    app.use(express.static(path.join(__dirname, "dist"), {
+      maxAge: "7d",
+      etag: true,
+      index: false,
+    }));
+    app.use("/uploads", express.static(path.join(__dirname, "public", "uploads"), {
+      maxAge: "30d",
+      etag: true,
+      immutable: true,
+    }));
     app.get("*", (req, res) => {
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
