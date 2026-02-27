@@ -428,6 +428,8 @@ export default function App() {
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
+  const [showCampusModal, setShowCampusModal] = useState(false);
+  const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -585,6 +587,8 @@ export default function App() {
   const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({}); // roomId -> names[]
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const mouseRafRef = useRef<number | null>(null);
+  const pendingMouseRef = useRef({ x: 0, y: 0 });
   const [directMessageList, setDirectMessageList] = useState<{ id: number; name: string; roomId: string; lastMessage?: string; unread: number; avatar?: string; campus?: string }[]>([]);
 
   // Effect to populate DM list from local storage or API
@@ -631,14 +635,45 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (view !== 'home') {
+      setMouse({ x: 0, y: 0 });
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMouse({ x: nx, y: ny });
+      pendingMouseRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      };
+
+      if (mouseRafRef.current !== null) return;
+
+      mouseRafRef.current = requestAnimationFrame(() => {
+        mouseRafRef.current = null;
+        setMouse((prev) => {
+          const next = pendingMouseRef.current;
+          const movedEnough = Math.abs(prev.x - next.x) > 0.02 || Math.abs(prev.y - next.y) > 0.02;
+          return movedEnough ? next : prev;
+        });
+      });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseRafRef.current !== null) {
+        cancelAnimationFrame(mouseRafRef.current);
+        mouseRafRef.current = null;
+      }
+    };
+  }, [view]);
+
+  useEffect(() => {
+    if (view === 'explorer' && selectedCampus) {
+      setActiveCampusSlug(selectedCampus.slug);
+    }
+  }, [view, selectedCampus]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -1412,7 +1447,7 @@ export default function App() {
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
                           <button 
-                            onClick={() => setSelectedCampus(c)}
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
                             className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
                           >
                             About
@@ -1740,7 +1775,9 @@ export default function App() {
           transition={{ duration: 5 + (i % 3), repeat: Infinity, ease: "easeInOut" }}
           className="absolute pointer-events-auto select-none hidden md:block cursor-pointer z-20"
           onClick={() => {
-            setSelectedCampus(c);
+            setActiveCampusSlug(c.slug);
+            setSelectedCampus(null);
+            setShowCampusModal(false);
             setView('explorer');
           }}
         >
@@ -2089,7 +2126,7 @@ export default function App() {
   );
 
   const renderExplorer = () => {
-    const activeCampus = selectedCampus || CAMPUSES[0];
+    const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
       <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
@@ -2103,7 +2140,7 @@ export default function App() {
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setSelectedCampus(campus)}
+                onClick={() => setActiveCampusSlug(campus.slug)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2154,6 +2191,15 @@ export default function App() {
               <div className="flex gap-3">
                 <button className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md">
                   Official Website
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedCampus(activeCampus);
+                    setShowCampusModal(true);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md"
+                >
+                  View Details
                 </button>
                 <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
                   Campus Map
@@ -2245,7 +2291,7 @@ export default function App() {
 
         {/* Campus Detail Modal */}
         <AnimatePresence>
-          {selectedCampus && (
+          {showCampusModal && selectedCampus && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -2258,7 +2304,7 @@ export default function App() {
                     <CampusLogo slug={selectedCampus.slug} />
                   </div>
                   <button 
-                    onClick={() => setSelectedCampus(null)}
+                    onClick={() => { setShowCampusModal(false); setSelectedCampus(null); }}
                     className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
                   >
                     <X size={20} />
@@ -4208,7 +4254,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-auto scrollbar-hide fixed inset-0">
+    <div className="min-h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden overflow-y-auto scrollbar-hide">
       <AnimatePresence>
         {showSplash && (
           <motion.div
