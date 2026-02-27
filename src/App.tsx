@@ -473,11 +473,9 @@ export default function App() {
   useEffect(() => {
     if (!showSplash) return;
 
-    // Mark splash as seen immediately so refresh won't replay it.
-    localStorage.setItem('onemsu_splash_seen', 'true');
-
     const timer = setTimeout(() => {
       setShowSplash(false);
+      localStorage.setItem('onemsu_splash_seen', 'true');
     }, 10000);
 
     return () => clearTimeout(timer);
@@ -729,12 +727,6 @@ export default function App() {
       }
     };
   }, [view]);
-
-  useEffect(() => {
-    if (view === 'explorer' && selectedCampus) {
-      setActiveCampusSlug(selectedCampus.slug);
-    }
-  }, [view, selectedCampus]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -2261,14 +2253,11 @@ export default function App() {
                     setSelectedCampus(activeCampus);
                     setShowCampusModal(true);
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                  className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md"
                 >
                   View Details
                 </button>
-                <button
-                  onClick={() => window.open(activeCampus.mapUrl, '_blank', 'noopener,noreferrer')}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
-                >
+                <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
                   Campus Map
                 </button>
               </div>
