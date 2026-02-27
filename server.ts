@@ -578,7 +578,7 @@ async function startServer() {
         db.prepare("INSERT OR REPLACE INTO presence (user_id, last_seen) VALUES (?, CURRENT_TIMESTAMP)").run(message.userId);
         broadcastToAll({ type: 'presence_update', userId: message.userId, status: 'online' });
       } else if (message.type === "chat") {
-        const { senderId, senderName, content, roomId, mediaUrl, mediaType } = message;
+        const { senderId, senderName, content, roomId, mediaUrl, mediaType, clientId } = message;
         
         // Save to DB
         const result = db.prepare("INSERT INTO messages (sender_id, sender_name, content, room_id, media_url, media_type) VALUES (?, ?, ?, ?, ?, ?)").run(senderId, senderName, content, roomId, mediaUrl || null, mediaType || null);
@@ -591,6 +591,7 @@ async function startServer() {
         const payload = JSON.stringify({
           type: "chat",
           id: msgId,
+          clientId: clientId || null,
           senderId,
           senderName,
           content,
