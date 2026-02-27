@@ -320,8 +320,8 @@ async function startServer() {
   app.post("/api/freedomwall", (req, res) => {
     const { userId, content, campus, imageUrl, alias } = req.body;
     if (!content || !campus) return res.status(400).json({ success: false, message: "Missing content or campus" });
-    const alias = "ONEMSU";
-    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, alias, content, campus, imageUrl || null);
+    const safeAlias = alias || "ONEMSU";
+    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, safeAlias, content, campus, imageUrl || null);
     const item = db.prepare("SELECT * FROM freedom_posts WHERE id = ?").get(info.lastInsertRowid);
     res.json({ success: true, item });
   });
@@ -644,7 +644,7 @@ async function startServer() {
     });
   }
 
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
