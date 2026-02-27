@@ -585,6 +585,8 @@ export default function App() {
   const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({}); // roomId -> names[]
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const mouseRafRef = useRef<number | null>(null);
+  const pendingMouseRef = useRef({ x: 0, y: 0 });
   const [directMessageList, setDirectMessageList] = useState<{ id: number; name: string; roomId: string; lastMessage?: string; unread: number; avatar?: string; campus?: string }[]>([]);
 
   // Effect to populate DM list from local storage or API
@@ -631,14 +633,39 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (view !== 'home') {
+      setMouse({ x: 0, y: 0 });
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMouse({ x: nx, y: ny });
+      pendingMouseRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      };
+
+      if (mouseRafRef.current !== null) return;
+
+      mouseRafRef.current = requestAnimationFrame(() => {
+        mouseRafRef.current = null;
+        setMouse((prev) => {
+          const next = pendingMouseRef.current;
+          const movedEnough = Math.abs(prev.x - next.x) > 0.02 || Math.abs(prev.y - next.y) > 0.02;
+          return movedEnough ? next : prev;
+        });
+      });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseRafRef.current !== null) {
+        cancelAnimationFrame(mouseRafRef.current);
+        mouseRafRef.current = null;
+      }
+    };
+  }, [view]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -4208,7 +4235,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-auto scrollbar-hide fixed inset-0">
+    <div className="min-h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden overflow-y-auto scrollbar-hide">
       <AnimatePresence>
         {showSplash && (
           <motion.div
