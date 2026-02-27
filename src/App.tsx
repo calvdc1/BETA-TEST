@@ -1774,12 +1774,12 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-full w-full bg-[linear-gradient(160deg,#0b1220_0%,#111a2e_45%,#1a2842_100%)] p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
+    <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(61,43,22,0.9),#090704_55%)] p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-7xl mx-auto pb-20">
-        <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8 rounded-3xl border border-cyan-300/30 bg-[#0b1628]/80 backdrop-blur-xl p-6 shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+        <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8 rounded-3xl border border-amber-400/20 bg-black/30 backdrop-blur-sm p-6">
           <div className="flex items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white">ONEMSU Command Center • {user?.name || 'MSUan'}</h2>
+              <h2 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'MSUan'}!</h2>
               <p className="text-gray-300/80 text-sm">Connected to {user?.email || 'Unified System'}</p>
             </div>
           </div>
@@ -1794,25 +1794,25 @@ export default function App() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/20 to-transparent p-4">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-cyan-100/90">Live Chats</p>
+          <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-amber-200/80">Unread Chats</p>
             <div className="mt-2 flex items-center justify-between">
               <p className="text-3xl font-extrabold text-white">{messengerUnread}</p>
-              <MessageCircle className="text-cyan-200" size={18} />
+              <MessageCircle className="text-amber-300" size={18} />
             </div>
           </div>
-          <div className="rounded-2xl border border-violet-400/25 bg-gradient-to-br from-violet-500/20 to-transparent p-4">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-violet-100/90">Campus Updates</p>
+          <div className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80">Campus Updates</p>
             <div className="mt-2 flex items-center justify-between">
               <p className="text-3xl font-extrabold text-white">{updatesUnread}</p>
-              <Bell className="text-violet-200" size={18} />
+              <Bell className="text-sky-300" size={18} />
             </div>
           </div>
-          <div className="rounded-2xl border border-fuchsia-400/25 bg-gradient-to-br from-fuchsia-500/20 to-transparent p-4">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-fuchsia-100/90">Community Groups</p>
+          <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-200/80">Community Groups</p>
             <div className="mt-2 flex items-center justify-between">
               <p className="text-3xl font-extrabold text-white">{groups.length}</p>
-              <Users className="text-fuchsia-200" size={18} />
+              <Users className="text-emerald-300" size={18} />
             </div>
           </div>
         </div>
@@ -1820,7 +1820,7 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar (Special Features) */}
           <div className="lg:col-span-1 space-y-8 order-2 lg:order-1">
-            <div className="p-6 rounded-3xl relative overflow-hidden group cursor-pointer border border-cyan-300/35 bg-gradient-to-br from-[#101a2e] to-[#1b2f52]" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
+            <div className="p-6 rounded-3xl relative overflow-hidden group cursor-pointer border border-indigo-400/30 bg-gradient-to-br from-slate-900 to-indigo-950/70" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -1844,8 +1844,40 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl border border-cyan-300/25 bg-[#0d1626]/90 backdrop-blur-xl shadow-2xl sticky bottom-4 z-20">
-              <h3 className="font-bold mb-4 text-cyan-100">Navigation & Quick Actions</h3>
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
+              <h3 className="font-bold mb-4 flex items-center gap-2"><Globe size={18} className="text-amber-500" /> Campus Information</h3>
+              <div className="space-y-3">
+                {CAMPUSES.map((c) => (
+                  <div key={c.slug} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-500/30 transition-all group">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 shrink-0 rounded-xl overflow-hidden shadow-lg">
+                        <CampusLogo slug={c.slug} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
+                          <button 
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
+                            className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
+                          >
+                            About
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1 mb-2">
+                          <MapPin size={10} /> {c.location}
+                        </div>
+                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                          {c.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
+              <h3 className="font-bold mb-4">Navigation & Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: 'Messenger', icon: <MessageCircle size={14} />, action: () => setView('messenger'), unread: messengerUnread },
@@ -1853,7 +1885,7 @@ export default function App() {
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
                   { name: 'Profile', icon: <Users size={14} />, action: () => setView('profile') },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
-                  { name: 'Community Groups', icon: <Users size={14} />, action: () => setView('messenger') },
+                  { name: 'Community Groups', icon: <Users size={14} />, action: () => { setView('messenger'); if (joinedGroups.length) { setActiveRoom(joinedGroups[0].name.toLowerCase().replace(/\s+/g, '-')); } } },
                   { name: 'Lost & Found', icon: <Search size={14} />, action: () => setView('lostfound') },
                   { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
                   { name: 'Library', icon: <BookOpen size={14} />, action: () => window.open('https://openlibrary.org', '_blank') },
@@ -1898,7 +1930,7 @@ export default function App() {
 
           {/* Main Feed */}
           <div className="lg:col-span-3 space-y-8 order-1 lg:order-2">
-            <div className="p-8 rounded-3xl border border-cyan-300/25 bg-gradient-to-r from-[#0d1729] to-[#1c2d4b] shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+            <div className="p-8 rounded-3xl border border-amber-400/30 bg-gradient-to-r from-[#16110a] to-[#1d202f] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Sparkles className="text-cyan-200" size={20} /> Confession Wall
               </h3>
@@ -1926,8 +1958,122 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-amber-500/20 bg-black/30 p-4 text-xs text-gray-300">
-              Community Groups moved to the floating navigation panel. Main dashboard now focuses on quick insights and confession feed.
+            <div className="grid grid-cols-1 gap-6">
+              <div className="p-6 rounded-3xl bg-black/30 border border-white/10 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold flex items-center gap-2"><Users size={18} className="text-amber-500" /> Community Groups</h4>
+                  <button
+                    onClick={() => setDashboardCreateOpen(v => !v)}
+                    className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-300 hover:bg-white/20"
+                  >
+                    {dashboardCreateOpen ? 'Close' : 'Create'}
+                  </button>
+                </div>
+                {dashboardCreateOpen && (
+                  <div className="mb-4 space-y-2">
+                    <input
+                      value={newGroup.name}
+                      onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
+                      placeholder="Group name"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                    />
+                    <select
+                      value={newGroup.campus}
+                      onChange={(e) => setNewGroup({ ...newGroup, campus: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                    >
+                      <option value="" className="bg-[#0a0502]">Select campus</option>
+                      {CAMPUSES.map(c => (
+                        <option key={c.slug} value={c.name} className="bg-[#0a0502]">{c.name}</option>
+                      ))}
+                    </select>
+                    <textarea
+                      value={newGroup.description}
+                      onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
+                      placeholder="Description (optional)"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                      rows={2}
+                    />
+                    <div className="flex items-center gap-3">
+                      <label className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 cursor-pointer w-fit">
+                        Upload logo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) { setNewGroup({ ...newGroup, logoPreview: '' }); return; }
+                            const reader = new FileReader();
+                            reader.onload = () => setNewGroup({ ...newGroup, logoPreview: reader.result as string });
+                            reader.readAsDataURL(file);
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      {newGroup.logoPreview ? <span className="text-xs text-amber-400">Logo attached</span> : <span className="text-xs text-gray-500">Optional</span>}
+                    </div>
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!newGroup.name || !newGroup.campus || dashboardCreating) return;
+                          setDashboardCreating(true);
+                          try {
+                            let logoUrl: string | undefined;
+                            if (newGroup.logoPreview) {
+                              const up = await fetch('/api/upload', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ dataUrl: newGroup.logoPreview })
+                              }).then(safeJson);
+                              if (up.success) logoUrl = up.url;
+                            }
+                            const res = await fetch('/api/groups', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ name: newGroup.name, description: newGroup.description, campus: newGroup.campus, logoUrl })
+                            }).then(safeJson);
+                            if (res.success) {
+                              setGroups((prev) => [res.group, ...prev]);
+                              setNewGroup({ name: '', description: '', campus: '', logoPreview: '' });
+                              setDashboardCreateOpen(false);
+                            }
+                          } finally {
+                            setDashboardCreating(false);
+                          }
+                        }}
+                        disabled={!newGroup.name || !newGroup.campus || dashboardCreating}
+                        aria-busy={dashboardCreating}
+                        className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
+                      >
+                        {dashboardCreating ? 'Creating…' : 'Create Group'}
+                      </button>
+                    </div>
+                    <div className="h-px w-full bg-white/10" />
+                  </div>
+                )}
+                <div className="space-y-3">
+                  {loadingGroups && <div className="text-sm text-gray-500">Loading groups...</div>}
+                  {!loadingGroups && groups.length === 0 && <div className="text-sm text-gray-500">No groups found.</div>}
+                  {!loadingGroups && groups.map(group => (
+                    <div key={group.id} className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div>
+                        <span className="text-sm">{group.name}</span>
+                        <span className="block text-[10px] text-gray-500">{group.campus}</span>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setActiveRoom(group.name.toLowerCase().replace(/\s+/g, '-'));
+                          setView('messenger');
+                        }}
+                        className="text-amber-500 hover:text-amber-400 text-xs"
+                      >
+                        Join
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2346,9 +2492,9 @@ export default function App() {
     const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
-      <div className="h-[100dvh] w-full royal-shell flex md:flex-row overflow-hidden">
+      <div className="h-[100dvh] w-full bg-[radial-gradient(circle_at_top,#1f1a12,#090909_58%)] flex md:flex-row overflow-hidden">
         {/* Sidebar - Campus List */}
-        <div className={`w-full md:w-80 border-r border-amber-400/15 ${showCampusDirectory ? 'flex' : 'hidden'} md:flex flex-col shrink-0 bg-[#0c1018]/95 backdrop-blur-md`}>
+        <div className={`w-full md:w-80 border-r border-white/5 ${showCampusDirectory ? 'flex' : 'hidden'} md:flex flex-col shrink-0 bg-[#121317]/95 backdrop-blur-md`}>
           <div className="p-6 border-b border-white/5">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold text-white">MSU <span className="text-amber-500">System</span></h2>
@@ -2376,7 +2522,7 @@ export default function App() {
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 ${showCampusDirectory ? 'hidden md:flex' : 'flex'} flex-col min-w-0 overflow-hidden bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95`}>
+        <div className={`flex-1 ${showCampusDirectory ? 'hidden md:flex' : 'flex'} flex-col min-w-0 overflow-y-auto scrollbar-hide bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95`}>
           <div className="md:hidden p-3 border-b border-white/10 bg-black/40 sticky top-0 z-20">
             <button onClick={() => setShowCampusDirectory(true)} className="px-3 py-2 rounded-lg text-xs font-bold bg-amber-500 text-black">All Campuses</button>
           </div>
@@ -3800,35 +3946,6 @@ export default function App() {
     }
   };
 
-
-  const extractFirstUrl = (text?: string) => {
-    if (!text) return null;
-    const match = text.match(/https?:\/\/[^\s]+/i);
-    return match ? match[0] : null;
-  };
-
-  const renderLinkPreview = (messageText?: string) => {
-    const url = extractFirstUrl(messageText);
-    if (!url) return null;
-
-    return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-2 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-[#13161e] p-2 hover:border-amber-300 transition-colors"
-      >
-        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500/30 to-yellow-200/20 border border-amber-300/40 p-1 shrink-0">
-          <Logo />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-amber-200">ONEMSU</p>
-          <p className="text-[10px] text-gray-300 truncate">{url}</p>
-        </div>
-      </a>
-    );
-  };
-
   const renderMessenger = () => {
     // Determine the other participant in a DM
     let otherParticipantId: number | null = null;
@@ -3847,7 +3964,7 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-[100dvh] royal-shell flex flex-col md:flex-row overflow-hidden text-gray-200">
+    <div className="h-[100dvh] bg-[radial-gradient(circle_at_top,#231a0f,#090909_60%)] flex flex-col md:flex-row overflow-hidden text-gray-200">
       {/* Sidebar */}
       <div className={`
         flex flex-col shrink-0 border-r border-white/5 transition-all duration-300
