@@ -509,7 +509,7 @@ async function startServer() {
           if (exists) {
             db.prepare("UPDATE read_receipts SET last_read = ? WHERE user_id = ? AND room_id = ?").run(lastRead, userId, roomId);
           } else {
-            db.prepare("INSERT INTO read_receipts (user_id, room_id, last_read) VALUES (?, ?)").run(lastRead, userId, roomId);
+            db.prepare("INSERT INTO read_receipts (user_id, room_id, last_read) VALUES (?, ?, ?)").run(userId, roomId, lastRead);
           }
         }
       } else if (message.type === "delete_message") {
