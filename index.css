@@ -4,6 +4,13 @@
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-gold: #b99740;
+  --color-amber-100: #fff8e1;
+  --color-amber-200: #f7e6b0;
+  --color-amber-300: #e9cd75;
+  --color-amber-400: #d8b24a;
+  --color-amber-500: #b99740;
+  --color-amber-600: #96742f;
+  --color-amber-900: #3a2b11;
 }
 
 @layer base {
