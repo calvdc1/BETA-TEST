@@ -93,11 +93,11 @@ interface Campus {
 // --- Constants ---
 
 const CAMPUSES: Campus[] = [
-  { 
-    name: "MSU Main", 
-    slug: "msu-main", 
-    location: "Marawi City", 
-    description: "The flagship campus of the Mindanao State University System. Located in Marawi City, it is a melting pot of cultures and a center of academic excellence.",
+  {
+    name: "MSU Main",
+    slug: "msu-main",
+    location: "Marawi City, Lanao del Sur",
+    description: "The flagship campus of the Mindanao State University System and the core academic and cultural hub of MSU.",
     stats: { students: "25k+", courses: "180+" },
     top: "12%", left: "8%",
     color: "#8e1212",
@@ -108,11 +108,11 @@ const CAMPUSES: Campus[] = [
       { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University" }
     ]
   },
-  { 
-    name: "MSU IIT", 
-    slug: "msu-iit", 
-    location: "Iligan City", 
-    description: "A premier institution of higher learning in the Philippines, known for its strong programs in science, technology, and engineering.",
+  {
+    name: "MSU IIT",
+    slug: "msu-iit",
+    location: "Iligan City",
+    description: "A leading institute in science, engineering, IT, and liberal arts in Northern Mindanao.",
     stats: { students: "18k+", courses: "120+" },
     top: "26%", left: "82%",
     color: "#1a3a5a",
@@ -123,11 +123,11 @@ const CAMPUSES: Campus[] = [
       { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University%E2%80%93Iligan_Institute_of_Technology" }
     ]
   },
-  { 
-    name: "MSU Gensan", 
-    slug: "msu-gensan", 
-    location: "General Santos City", 
-    description: "Serving the SOCCSKSARGEN region with excellence in agriculture, fisheries, and business education.",
+  {
+    name: "MSU Gensan",
+    slug: "msu-gensan",
+    location: "General Santos City",
+    description: "Serving the SOCCSKSARGEN region through programs in education, business, and applied sciences.",
     stats: { students: "12k+", courses: "90+" },
     top: "38%", left: "12%",
     color: "#1b5e20",
@@ -138,11 +138,11 @@ const CAMPUSES: Campus[] = [
       { label: "CHED Listing", url: "https://ched.gov.ph/" }
     ]
   },
-  { 
-    name: "MSU Tawi-Tawi", 
-    slug: "msu-tawi-tawi", 
-    location: "Bongao, Tawi-Tawi", 
-    description: "The southernmost campus specializing in fisheries, oceanography, and marine biodiversity conservation.",
+  {
+    name: "MSU Tawi-Tawi",
+    slug: "msu-tawi-tawi",
+    location: "Bongao, Tawi-Tawi",
+    description: "Known for fisheries, marine science, and ocean-related studies in the southern Philippines.",
     stats: { students: "8k+", courses: "45+" },
     top: "56%", left: "76%",
     color: "#01579b",
@@ -153,11 +153,11 @@ const CAMPUSES: Campus[] = [
       { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography" }
     ]
   },
-  { 
-    name: "MSU Naawan", 
-    slug: "msu-naawan", 
-    location: "Naawan, Misamis Oriental", 
-    description: "A center of excellence in fisheries and marine sciences, dedicated to sustainable coastal resource management.",
+  {
+    name: "MSU Naawan",
+    slug: "msu-naawan",
+    location: "Naawan, Misamis Oriental",
+    description: "A center for fisheries, aquaculture, and coastal resource research and development.",
     stats: { students: "5k+", courses: "35+" },
     top: "18%", left: "74%",
     color: "#e65100",
@@ -168,11 +168,11 @@ const CAMPUSES: Campus[] = [
       { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Naawan" }
     ]
   },
-  { 
-    name: "MSU Maguindanao", 
-    slug: "msu-maguindanao", 
-    location: "Datu Odin Sinsuat", 
-    description: "Empowering the Bangsamoro through education, with a focus on peace and development studies.",
+  {
+    name: "MSU Maguindanao",
+    slug: "msu-maguindanao",
+    location: "Datu Odin Sinsuat, Maguindanao",
+    description: "A major MSU campus focused on inclusive development, governance, and community-based learning.",
     stats: { students: "7k+", courses: "50+" },
     top: "64%", left: "10%",
     color: "#33691e",
@@ -183,11 +183,11 @@ const CAMPUSES: Campus[] = [
       { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Maguindanao" }
     ]
   },
-  { 
-    name: "MSU Sulu", 
-    slug: "msu-sulu", 
-    location: "Jolo, Sulu", 
-    description: "Fostering peace and development in the Sulu archipelago through quality education and cultural preservation.",
+  {
+    name: "MSU Sulu",
+    slug: "msu-sulu",
+    location: "Jolo, Sulu",
+    description: "Supports higher education access and peace-building initiatives in Sulu and nearby island communities.",
     stats: { students: "6k+", courses: "40+" },
     top: "44%", left: "84%",
     color: "#bf360c",
@@ -198,11 +198,11 @@ const CAMPUSES: Campus[] = [
       { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Sulu" }
     ]
   },
-  { 
-    name: "MSU Buug", 
-    slug: "msu-buug", 
-    location: "Buug, Zamboanga Sibugay", 
-    description: "Providing quality education in the Sibugay area, emphasizing agriculture and forestry.",
+  {
+    name: "MSU Buug",
+    slug: "msu-buug",
+    location: "Buug, Zamboanga Sibugay",
+    description: "Provides programs in teacher education, agriculture, and community extension services.",
     stats: { students: "4k+", courses: "30+" },
     top: "70%", left: "68%",
     color: "#4a148c",
@@ -434,21 +434,46 @@ const SplashScreen = () => {
 
 const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, className?: string }) => {
   const campus = CAMPUSES.find(c => c.slug === slug);
-  const color = campus?.color || "#b99740";
-  
+  const primary = campus?.color || "#b99740";
+  const nameTokens = (campus?.name || slug)
+    .replace(/MSU|College|School|Community|High|of|and|the|Campus/gi, "")
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean);
+  const initials = nameTokens.slice(0, 2).map(t => t[0]?.toUpperCase()).join("") || "MS";
+
+  const lower = `${campus?.name ?? ''} ${campus?.description ?? ''}`.toLowerCase();
+  const iconVariant = lower.includes('marine') || lower.includes('fisher') || lower.includes('ocean')
+    ? 2
+    : lower.includes('technology') || lower.includes('science') || lower.includes('engineering')
+      ? 1
+      : lower.includes('peace') || lower.includes('security') || lower.includes('governance')
+        ? 3
+        : 0;
+  const accent = ["#f8e38c", "#c5e1ff", "#c8f7c5", "#ffd5b0"][iconVariant];
+
   return (
-    <svg viewBox="0 0 100 100" className={className}>
+    <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id={`grad-${slug}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={color} />
-          <stop offset="100%" stopColor="#000" stopOpacity="0.5" />
+        <radialGradient id={`badge-${slug}`} cx="35%" cy="25%" r="80%">
+          <stop offset="0%" stopColor={primary} stopOpacity="1" />
+          <stop offset="100%" stopColor="#090909" stopOpacity="0.95" />
+        </radialGradient>
+        <linearGradient id={`ring-${slug}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={accent} stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.2" />
         </linearGradient>
       </defs>
-      <circle cx="50" cy="50" r="48" fill={`url(#grad-${slug})`} />
-      <circle cx="50" cy="50" r="42" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.3" />
-      <path d="M50 25 L75 75 L25 75 Z" fill="white" />
-      <text x="50" y="65" textAnchor="middle" fill="white" fontSize="10" fontWeight="900" fontFamily="serif" style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5))' }}>
-        {slug.split('-')[1]?.toUpperCase() || 'MSU'}
+
+      <circle cx="50" cy="50" r="48" fill={`url(#badge-${slug})`} />
+      <circle cx="50" cy="50" r="41" fill="none" stroke={`url(#ring-${slug})`} strokeWidth="2" />
+
+      {iconVariant === 0 && <path d="M50 23 L74 68 L26 68 Z" fill="rgba(255,255,255,0.92)" />}
+      {iconVariant === 1 && <rect x="30" y="28" width="40" height="40" rx="8" fill="rgba(255,255,255,0.9)" />}
+      {iconVariant === 2 && <path d="M50 22 C64 31 72 44 72 56 C72 67 62 76 50 80 C38 76 28 67 28 56 C28 44 36 31 50 22 Z" fill="rgba(255,255,255,0.9)" />}
+      {iconVariant === 3 && <path d="M50 22 L58 40 L78 42 L63 56 L68 76 L50 66 L32 76 L37 56 L22 42 L42 40 Z" fill="rgba(255,255,255,0.9)" />}
+
+      <text x="50" y="61" textAnchor="middle" fill={primary} fontSize="16" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="1.5">
+        {initials}
       </text>
     </svg>
   );
@@ -1304,6 +1329,20 @@ export default function App() {
       }
     }
   };
+
+  const parseMaybeJson = async (r: Response) => {
+    try {
+      const t = await r.text();
+      if (!t) return {};
+      return JSON.parse(t);
+    } catch {
+      return {};
+    }
+  };
+
+  const getCampus3DMapUrl = (campus: Campus) => (
+    `https://earth.google.com/web/search/${encodeURIComponent(`${campus.name}, ${campus.location}`)}`
+  );
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
