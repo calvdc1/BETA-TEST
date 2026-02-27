@@ -93,6 +93,14 @@ interface Campus {
   sources: { label: string; url: string }[];
 }
 
+interface CampusTimelineEvent {
+  year: string;
+  title: string;
+  detail: string;
+  sourceLabel: string;
+  sourceUrl: string;
+}
+
 // --- Constants ---
 
 const CAMPUSES: Campus[] = [
@@ -316,6 +324,57 @@ const SPARKLES = [
   { top: "68%", left: "16%" },
   { top: "82%", left: "60%" },
 ];
+
+const CAMPUS_TIMELINES: Record<string, CampusTimelineEvent[]> = {
+  'msu-main': [
+    {
+      year: '1961',
+      title: 'MSU Main campus established in Marawi',
+      detail: 'The flagship campus was created under Republic Act No. 1387 as the mother campus of the MSU System.',
+      sourceLabel: 'MSU Main Official',
+      sourceUrl: 'https://www.msumain.edu.ph/'
+    },
+    {
+      year: 'Today',
+      title: 'Flagship academic and cultural center',
+      detail: 'MSU Main continues to serve as the central hub for system-level academic and cultural initiatives.',
+      sourceLabel: 'MSU System',
+      sourceUrl: 'https://www.msu.edu.ph/'
+    }
+  ],
+  'msu-iit': [
+    {
+      year: '1968',
+      title: 'MSU IIT became an autonomous unit',
+      detail: 'MSU-Iligan Institute of Technology was recognized as an autonomous campus in the MSU System.',
+      sourceLabel: 'MSU-IIT Official',
+      sourceUrl: 'https://www.msuiit.edu.ph/'
+    },
+    {
+      year: 'Today',
+      title: 'Leading center for science and engineering',
+      detail: 'MSU-IIT remains one of the system\'s leading campuses in science, engineering, and technology programs.',
+      sourceLabel: 'MSU-IIT Official',
+      sourceUrl: 'https://www.msuiit.edu.ph/'
+    }
+  ],
+  default: [
+    {
+      year: '1961',
+      title: 'MSU System established',
+      detail: 'The Mindanao State University System was established under Republic Act No. 1387.',
+      sourceLabel: 'MSU System',
+      sourceUrl: 'https://www.msu.edu.ph/'
+    },
+    {
+      year: 'Today',
+      title: 'Campus actively serves its local community',
+      detail: 'This campus continues delivering instruction, extension, and community service as part of the MSU System network.',
+      sourceLabel: 'MSU System',
+      sourceUrl: 'https://www.msu.edu.ph/'
+    }
+  ]
+};
 
 
 // --- Components ---
@@ -2624,20 +2683,20 @@ export default function App() {
               </section>
             </div>
 
-            {/* Right: Newsfeed */}
+            {/* Right: Timeline */}
             <div className="xl:col-span-8 space-y-8">
               <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
                     <MessageSquare className="text-amber-500" size={24} /> 
-                    Campus <span className="text-amber-500">Newsfeed</span>
+                    Campus <span className="text-amber-500">Timeline</span>
                   </h3>
                   <div className="flex gap-2">
                     <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Search size={18} /></button>
                     <button className="p-2 rounded-lg bg-white/5 text-gray-500 hover:text-white transition-colors"><Bell size={18} /></button>
                   </div>
                 </div>
-                <CampusNewsfeed campus={activeCampus} />
+                <CampusTimeline campus={activeCampus} />
               </div>
             </div>
           </div>
@@ -2688,9 +2747,9 @@ export default function App() {
                   <div className="h-px w-full bg-white/10 mb-8" />
                   
                   <h4 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <MessageSquare className="text-amber-500" size={20} /> Campus Newsfeed
+                    <MessageSquare className="text-amber-500" size={20} /> Campus Timeline
                   </h4>
-                  <CampusNewsfeed campus={selectedCampus} />
+                  <CampusTimeline campus={selectedCampus} />
                 </div>
               </motion.div>
             </div>
@@ -2744,192 +2803,63 @@ export default function App() {
     );
   };
 
-  const CampusNewsfeed = ({ campus }: { campus: Campus }) => {
-    const [posts, setPosts] = useState<any[]>([]);
-    const [text, setText] = useState('');
-    const [media, setMedia] = useState<{ url: string; type: string } | null>(null);
-    const [loading, setLoading] = useState(false);
-    const room = `newsfeed-${campus.slug}`;
-
-    const fetchPosts = () => {
-      fetch(`/api/messages/${room}`).then(r => r.json()).then(setPosts);
-    };
-
-    useEffect(() => {
-      fetchPosts();
-      const interval = setInterval(fetchPosts, 5000);
-      return () => clearInterval(interval);
-    }, [room]);
-
-    const handlePost = async () => {
-      if (!user || (!text.trim() && !media)) return;
-      setLoading(true);
-      try {
-        if (socketRef.current) {
-          socketRef.current.send(JSON.stringify({
-            type: 'chat',
-            senderId: user.id,
-            senderName: user.name,
-            senderEmail: user.email,
-            senderAvatar: user.avatar,
-            content: text.trim(),
-            roomId: room,
-            mediaUrl: media?.url,
-            mediaType: media?.type
-          }));
-          setText('');
-          setMedia(null);
-          setTimeout(fetchPosts, 500);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  const CampusTimeline = ({ campus }: { campus: Campus }) => {
+    const timeline = CAMPUS_TIMELINES[campus.slug] || CAMPUS_TIMELINES.default;
 
     return (
-      <div className="space-y-6">
-        {/* Post Input */}
-        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-lg">
-          <div className="flex gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 font-bold shrink-0 overflow-hidden ring-2 ring-white/5">
-              {user?.avatar ? <img src={user.avatar} alt="" className="w-full h-full object-cover" /> : (user?.name || 'U')[0]}
+      <div className="space-y-5">
+        {timeline.map((event, index) => (
+          <div
+            key={`${campus.slug}-${event.year}-${index}`}
+            className="p-5 rounded-3xl border bg-black/30"
+            style={{ borderColor: `${campus.color}66` }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="mt-1 w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: campus.color }} />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]" style={{ color: campus.color }}>
+                    {event.year}
+                  </span>
+                  <span className="text-white font-bold text-sm md:text-base">{event.title}</span>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">{event.detail}</p>
+                <a
+                  href={event.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs mt-3 font-semibold hover:underline"
+                  style={{ color: campus.color }}
+                >
+                  <ExternalLink size={12} /> Source: {event.sourceLabel}
+                </a>
+              </div>
             </div>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={`What's on your mind, ${user?.name?.split(' ')[0]}?`}
-              className="flex-1 bg-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/30 resize-none transition-all"
-              rows={2}
-            />
           </div>
-          
-          {media && (
-            <div className="relative mb-4 ml-13 rounded-2xl overflow-hidden border border-white/10 max-w-sm group">
-              {media.type.startsWith('video') ? (
-                <video src={media.url} controls className="w-full" />
-              ) : (
-                <img src={media.url} alt="" className="w-full object-cover max-h-64" />
-              )}
-              <button 
-                onClick={() => setMedia(null)}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+        ))}
+
+        <div className="p-4 rounded-2xl border bg-black/30" style={{ borderColor: `${campus.color}55` }}>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] mb-2" style={{ color: campus.color }}>
+            Official Reference Links
+          </p>
+          <div className="grid gap-2">
+            {campus.sources.map((source) => (
+              <a
+                key={`${campus.slug}-${source.url}`}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-300 hover:text-white transition-colors"
               >
-                <X size={14} />
-              </button>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center pt-3 border-t border-white/5 ml-13">
-            <div className="flex gap-1">
-              <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-white/5 text-gray-400 cursor-pointer transition-colors group">
-                <Image size={18} className="group-hover:text-emerald-500" />
-                <span className="text-xs font-medium">Photo/Video</span>
-                <input 
-                  type="file" 
-                  accept="image/*,video/*,.gif" 
-                  className="hidden" 
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = async () => {
-                      const res = await fetch('/api/upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dataUrl: reader.result as string })
-                      }).then(r => r.json());
-                      if (res.success) {
-                        setMedia({ url: res.url, type: res.mimeType });
-                      }
-                    };
-                    reader.readAsDataURL(file);
-                  }}
-                />
-              </label>
-            </div>
-            <button 
-              onClick={handlePost}
-              disabled={loading || (!text.trim() && !media)}
-              className="px-6 py-1.5 rounded-xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 shadow-lg shadow-amber-900/20"
-            >
-              {loading ? 'Posting…' : 'Post'}
-            </button>
+                • {source.label}
+              </a>
+            ))}
           </div>
-        </div>
-
-        {/* Feed List */}
-        <div className="space-y-4 max-h-[800px] overflow-y-auto scrollbar-hide pb-12 pr-1">
-          {posts.slice().reverse().map((post, i) => (
-            <div key={i} className="p-5 rounded-3xl bg-white/5 border border-white/10 shadow-xl hover:border-white/20 transition-all group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 font-bold text-sm overflow-hidden ring-2 ring-white/5 cursor-pointer"
-                    onClick={() => setSelectedProfileId(post.sender_id || post.senderId)}
-                  >
-                    {post.sender_avatar || post.senderAvatar ? (
-                      <img src={post.sender_avatar || post.senderAvatar} alt="" className="w-full h-full object-cover" />
-                    ) : (post.sender_name || 'U')[0]}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className="text-sm font-bold text-white hover:text-amber-400 cursor-pointer transition-colors"
-                        onClick={() => setSelectedProfileId(post.sender_id || post.senderId)}
-                      >
-                        {post.sender_name}
-                      </span>
-                      {isOwner(post.sender_email || post.senderEmail) && (
-                        <ShieldCheck size={14} className="text-amber-500" />
-                      )}
-                    </div>
-                    <div className="text-[10px] text-gray-500 flex items-center gap-1">
-                      <Clock size={10} /> {new Date(post.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                    </div>
-                  </div>
-                </div>
-                <button className="p-2 rounded-full hover:bg-white/5 text-gray-500 transition-colors">
-                  <MoreHorizontal size={18} />
-                </button>
-              </div>
-
-              <p className="text-sm text-gray-200 mb-4 whitespace-pre-wrap leading-relaxed px-1">{post.content}</p>
-              
-              {(post.media_url || post.mediaUrl) && (
-                <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/20 mb-4">
-                  {(post.media_type || post.mediaType)?.startsWith('video') ? (
-                    <video src={post.media_url || post.mediaUrl} controls className="w-full max-h-[500px]" />
-                  ) : (
-                    <img src={post.media_url || post.mediaUrl} alt="" className="w-full object-contain max-h-[500px]" />
-                  )}
-                </div>
-              )}
-
-              <div className="flex items-center gap-6 pt-3 border-t border-white/5 px-1">
-                <button className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-500 transition-colors">
-                  <Heart size={18} /> 0
-                </button>
-                <button className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-500 transition-colors">
-                  <MessageCircle size={18} /> 0
-                </button>
-                <button className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-500 transition-colors ml-auto">
-                  <Share2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
-          
-          {posts.length === 0 && (
-            <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-              <MessageSquare size={48} className="mx-auto mb-4 text-gray-700" />
-              <p className="text-gray-500 font-medium">No posts in {campus.name} yet.</p>
-              <p className="text-xs text-gray-600 mt-1">Start the conversation!</p>
-            </div>
-          )}
         </div>
       </div>
     );
   };
+
 
   const renderAbout = () => (
     <div className="min-h-screen bg-[#0a0502] text-gray-200">
