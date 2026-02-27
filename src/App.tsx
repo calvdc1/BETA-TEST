@@ -1902,7 +1902,7 @@ export default function App() {
                   <button 
                     key={item.name} 
                     onClick={() => item.action ? item.action() : null}
-                    className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs font-medium hover:bg-amber-500 hover:text-black transition-all flex flex-col items-center gap-2 relative group"
+                    className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs font-medium hover:bg-cyan-300 hover:text-[#07111f] transition-all flex flex-col items-center gap-2 relative group"
                   >
                     {(item as any).unread > 0 && (
                       <motion.span
@@ -1932,7 +1932,7 @@ export default function App() {
           <div className="lg:col-span-3 space-y-8 order-1 lg:order-2">
             <div className="p-8 rounded-3xl border border-amber-400/30 bg-gradient-to-r from-[#16110a] to-[#1d202f] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <Sparkles className="text-amber-500" size={20} /> Confession Wall
+                <Sparkles className="text-cyan-200" size={20} /> Confession Wall
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {freedomPosts.slice(0, 5).map((p) => (
@@ -1940,7 +1940,7 @@ export default function App() {
                     {p.image_url && <img src={p.image_url} alt="" className={`${freedomPosts.indexOf(p) === 0 ? 'h-48' : 'h-32'} w-full object-cover`} />}
                     <div className="p-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold text-amber-400">{p.alias}</span>
+                        <span className="text-sm font-bold text-cyan-200">{p.alias}</span>
                         <span className="text-[10px] text-gray-500">{p.campus} • {new Date(p.timestamp).toLocaleDateString()}</span>
                       </div>
                       <div className={`mt-2 ${freedomPosts.indexOf(p) === 0 ? 'text-base' : 'text-sm'} text-gray-200 line-clamp-3`}>{p.content}</div>
@@ -1952,7 +1952,7 @@ export default function App() {
                 )}
               </div>
               <div className="mt-6 flex justify-end">
-                <button onClick={() => setView('confession')} className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors">
+                <button onClick={() => setView('confession')} className="px-4 py-2 rounded-lg bg-cyan-300 text-[#07111f] font-bold hover:bg-cyan-200 transition-colors">
                   Open Confession
                 </button>
               </div>
@@ -2713,7 +2713,7 @@ export default function App() {
                         joinGroup(selectedGroup);
                         setSelectedGroup(null);
                       }}
-                      className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors"
+                      className="px-4 py-2 rounded-lg bg-cyan-300 text-[#07111f] font-bold hover:bg-cyan-200 transition-colors"
                     >
                       {joinedGroups.some(g => g.id === selectedGroup.id) ? 'Open Chat' : 'Join Chat'}
                     </button>
