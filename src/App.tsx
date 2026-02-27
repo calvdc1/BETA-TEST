@@ -85,6 +85,9 @@ interface Campus {
   top: string;
   left: string;
   color: string;
+  website: string;
+  mapUrl: string;
+  sources: { label: string; url: string }[];
 }
 
 // --- Constants ---
@@ -97,7 +100,13 @@ const CAMPUSES: Campus[] = [
     description: "The flagship campus of the Mindanao State University System. Located in Marawi City, it is a melting pot of cultures and a center of academic excellence.",
     stats: { students: "25k+", courses: "180+" },
     top: "12%", left: "8%",
-    color: "#8e1212"
+    color: "#8e1212",
+    website: "https://www.msumain.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Main+Campus+Marawi+City",
+    sources: [
+      { label: "MSU Main Official", url: "https://www.msumain.edu.ph/" },
+      { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University" }
+    ]
   },
   { 
     name: "MSU IIT", 
@@ -106,7 +115,13 @@ const CAMPUSES: Campus[] = [
     description: "A premier institution of higher learning in the Philippines, known for its strong programs in science, technology, and engineering.",
     stats: { students: "18k+", courses: "120+" },
     top: "26%", left: "82%",
-    color: "#1a3a5a"
+    color: "#1a3a5a",
+    website: "https://www.msuiit.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU-IIT+Iligan+City",
+    sources: [
+      { label: "MSU-IIT Official", url: "https://www.msuiit.edu.ph/" },
+      { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University%E2%80%93Iligan_Institute_of_Technology" }
+    ]
   },
   { 
     name: "MSU Gensan", 
@@ -115,7 +130,13 @@ const CAMPUSES: Campus[] = [
     description: "Serving the SOCCSKSARGEN region with excellence in agriculture, fisheries, and business education.",
     stats: { students: "12k+", courses: "90+" },
     top: "38%", left: "12%",
-    color: "#1b5e20"
+    color: "#1b5e20",
+    website: "https://gensan.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+General+Santos+Campus",
+    sources: [
+      { label: "MSU Gensan Official", url: "https://gensan.msu.edu.ph/" },
+      { label: "CHED Listing", url: "https://ched.gov.ph/" }
+    ]
   },
   { 
     name: "MSU Tawi-Tawi", 
@@ -124,7 +145,13 @@ const CAMPUSES: Campus[] = [
     description: "The southernmost campus specializing in fisheries, oceanography, and marine biodiversity conservation.",
     stats: { students: "8k+", courses: "45+" },
     top: "56%", left: "76%",
-    color: "#01579b"
+    color: "#01579b",
+    website: "https://tawitawi.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography",
+    sources: [
+      { label: "MSU Tawi-Tawi Official", url: "https://tawitawi.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography" }
+    ]
   },
   { 
     name: "MSU Naawan", 
@@ -133,7 +160,13 @@ const CAMPUSES: Campus[] = [
     description: "A center of excellence in fisheries and marine sciences, dedicated to sustainable coastal resource management.",
     stats: { students: "5k+", courses: "35+" },
     top: "18%", left: "74%",
-    color: "#e65100"
+    color: "#e65100",
+    website: "https://naawan.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Naawan",
+    sources: [
+      { label: "MSU Naawan Official", url: "https://naawan.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Naawan" }
+    ]
   },
   { 
     name: "MSU Maguindanao", 
@@ -142,7 +175,13 @@ const CAMPUSES: Campus[] = [
     description: "Empowering the Bangsamoro through education, with a focus on peace and development studies.",
     stats: { students: "7k+", courses: "50+" },
     top: "64%", left: "10%",
-    color: "#33691e"
+    color: "#33691e",
+    website: "https://maguindanao.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Maguindanao",
+    sources: [
+      { label: "MSU Maguindanao Official", url: "https://maguindanao.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Maguindanao" }
+    ]
   },
   { 
     name: "MSU Sulu", 
@@ -151,7 +190,13 @@ const CAMPUSES: Campus[] = [
     description: "Fostering peace and development in the Sulu archipelago through quality education and cultural preservation.",
     stats: { students: "6k+", courses: "40+" },
     top: "44%", left: "84%",
-    color: "#bf360c"
+    color: "#bf360c",
+    website: "https://sulu.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Sulu",
+    sources: [
+      { label: "MSU Sulu Official", url: "https://sulu.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Sulu" }
+    ]
   },
   { 
     name: "MSU Buug", 
@@ -160,7 +205,13 @@ const CAMPUSES: Campus[] = [
     description: "Providing quality education in the Sibugay area, emphasizing agriculture and forestry.",
     stats: { students: "4k+", courses: "30+" },
     top: "70%", left: "68%",
-    color: "#4a148c"
+    color: "#4a148c",
+    website: "https://buug.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Buug",
+    sources: [
+      { label: "MSU Buug Official", url: "https://buug.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Buug" }
+    ]
   },
 ];
 
@@ -428,12 +479,15 @@ export default function App() {
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
+  const [showCampusModal, setShowCampusModal] = useState(false);
+  const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('onemsu_auth') === 'true';
@@ -585,6 +639,8 @@ export default function App() {
   const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({}); // roomId -> names[]
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const mouseRafRef = useRef<number | null>(null);
+  const pendingMouseRef = useRef({ x: 0, y: 0 });
   const [directMessageList, setDirectMessageList] = useState<{ id: number; name: string; roomId: string; lastMessage?: string; unread: number; avatar?: string; campus?: string }[]>([]);
 
   // Effect to populate DM list from local storage or API
@@ -631,14 +687,45 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (view !== 'home') {
+      setMouse({ x: 0, y: 0 });
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMouse({ x: nx, y: ny });
+      pendingMouseRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      };
+
+      if (mouseRafRef.current !== null) return;
+
+      mouseRafRef.current = requestAnimationFrame(() => {
+        mouseRafRef.current = null;
+        setMouse((prev) => {
+          const next = pendingMouseRef.current;
+          const movedEnough = Math.abs(prev.x - next.x) > 0.02 || Math.abs(prev.y - next.y) > 0.02;
+          return movedEnough ? next : prev;
+        });
+      });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseRafRef.current !== null) {
+        cancelAnimationFrame(mouseRafRef.current);
+        mouseRafRef.current = null;
+      }
+    };
+  }, [view]);
+
+  useEffect(() => {
+    if (view === 'explorer' && selectedCampus) {
+      setActiveCampusSlug(selectedCampus.slug);
+    }
+  }, [view, selectedCampus]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -1220,9 +1307,10 @@ export default function App() {
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
+    const password = (formData.get('password') as string).trim();
 
+    setAuthError(null);
     setIsAuthLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
@@ -1233,17 +1321,16 @@ export default function App() {
 
       const data = await res.json();
       if (data.success) {
-        setTimeout(() => {
-          setUser(data.user);
-          setIsLoggedIn(true);
-          setIsLoginOpen(false);
-          setIsAuthLoading(false);
-        }, 1000);
+        setUser(data.user);
+        setIsLoggedIn(true);
+        setView('dashboard');
+        setIsLoginOpen(false);
       } else {
-        alert(data.message);
-        setIsAuthLoading(false);
+        setAuthError(data.message || 'Invalid credentials.');
       }
     } catch {
+      setAuthError('Unable to sign in right now. Please try again.');
+    } finally {
       setIsAuthLoading(false);
     }
   };
@@ -1251,7 +1338,7 @@ export default function App() {
   const handleSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
     const name = formData.get('name') as string;
     const password = formData.get('password') as string;
     const campus = formData.get('campus') as string;
@@ -1259,6 +1346,7 @@ export default function App() {
     const program = formData.get('program') as string;
     const year_level = formData.get('year_level') as string;
 
+    setAuthError(null);
     setIsAuthLoading(true);
     try {
       const res = await fetch('/api/auth/signup', {
@@ -1269,17 +1357,16 @@ export default function App() {
 
       const data = await res.json();
       if (data.success) {
-        setTimeout(() => {
-          setUser(data.user);
-          setIsLoggedIn(true);
-          setIsSignupOpen(false);
-          setIsAuthLoading(false);
-        }, 1000);
+        setUser(data.user);
+        setIsLoggedIn(true);
+        setView('dashboard');
+        setIsSignupOpen(false);
       } else {
-        alert(data.message);
-        setIsAuthLoading(false);
+        setAuthError(data.message || 'Unable to create account.');
       }
     } catch {
+      setAuthError('Unable to create account right now. Please try again.');
+    } finally {
       setIsAuthLoading(false);
     }
   };
@@ -1295,7 +1382,7 @@ export default function App() {
   const handleForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
 
     setIsAuthLoading(true);
     try {
@@ -1412,7 +1499,7 @@ export default function App() {
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
                           <button 
-                            onClick={() => setSelectedCampus(c)}
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
                             className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
                           >
                             About
@@ -1740,7 +1827,9 @@ export default function App() {
           transition={{ duration: 5 + (i % 3), repeat: Infinity, ease: "easeInOut" }}
           className="absolute pointer-events-auto select-none hidden md:block cursor-pointer z-20"
           onClick={() => {
-            setSelectedCampus(c);
+            setActiveCampusSlug(c.slug);
+            setSelectedCampus(null);
+            setShowCampusModal(false);
             setView('explorer');
           }}
         >
@@ -1795,7 +1884,7 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setIsLoginOpen(true)}
+              onClick={() => { setAuthError(null); setIsLoginOpen(true); }}
               className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-xl font-bold backdrop-blur-md transition-colors"
             >
               Log in
@@ -1820,8 +1909,9 @@ export default function App() {
               </div>
               
               <form className="space-y-6" onSubmit={handleLogin}>
+                {authError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{authError}</p>}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">MSU Email / ID</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email</label>
                   <input 
                     name="email"
                     type="email" 
@@ -1875,7 +1965,7 @@ export default function App() {
               
               <div className="mt-8 pt-8 border-t border-white/5 text-center">
                 <p className="text-sm text-gray-500">
-                  Don't have an account? <button onClick={() => { setIsLoginOpen(false); setIsSignupOpen(true); }} className="text-amber-500 font-semibold hover:underline">Register here</button>
+                  Don't have an account? <button onClick={() => { setAuthError(null); setIsLoginOpen(false); setIsSignupOpen(true); }} className="text-amber-500 font-semibold hover:underline">Register here</button>
                 </p>
               </div>
             </motion.div>
@@ -1899,6 +1989,7 @@ export default function App() {
               </div>
               
               <form className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-hide" onSubmit={handleSignup}>
+                {authError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{authError}</p>}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Full Name</label>
@@ -1950,15 +2041,13 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Gmail Address</label>
+                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Email Address</label>
                   <input 
                     name="email"
                     type="email" 
-                    placeholder="juan.delacruz@gmail.com"
+                    placeholder="juan.delacruz@example.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors"
                     required
-                    pattern=".+@gmail\.com"
-                    title="Please use a valid @gmail.com address"
                   />
                 </div>
                 
@@ -2006,7 +2095,7 @@ export default function App() {
               
               <div className="mt-8 pt-8 border-t border-white/5 text-center">
                 <p className="text-sm text-gray-500">
-                  Already have an account? <button onClick={() => { setIsSignupOpen(false); setIsLoginOpen(true); }} className="text-amber-500 font-semibold hover:underline">Sign In</button>
+                  Already have an account? <button onClick={() => { setAuthError(null); setIsSignupOpen(false); setIsLoginOpen(true); }} className="text-amber-500 font-semibold hover:underline">Sign In</button>
                 </p>
               </div>
             </motion.div>
@@ -2039,7 +2128,7 @@ export default function App() {
                   <input 
                     name="email"
                     type="email" 
-                    placeholder="juan.delacruz@gmail.com"
+                    placeholder="juan.delacruz@example.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
                     required
                     pattern=".+@gmail\.com"
@@ -2089,7 +2178,7 @@ export default function App() {
   );
 
   const renderExplorer = () => {
-    const activeCampus = selectedCampus || CAMPUSES[0];
+    const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
       <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
@@ -2103,7 +2192,7 @@ export default function App() {
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setSelectedCampus(campus)}
+                onClick={() => setActiveCampusSlug(campus.slug)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2152,10 +2241,25 @@ export default function App() {
               </div>
               
               <div className="flex gap-3">
-                <button className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md">
+                <button
+                  onClick={() => window.open(activeCampus.website, '_blank', 'noopener,noreferrer')}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                >
                   Official Website
                 </button>
-                <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
+                <button
+                  onClick={() => {
+                    setSelectedCampus(activeCampus);
+                    setShowCampusModal(true);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={() => window.open(activeCampus.mapUrl, '_blank', 'noopener,noreferrer')}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
+                >
                   Campus Map
                 </button>
               </div>
@@ -2222,6 +2326,24 @@ export default function App() {
                   ))}
                 </div>
               </section>
+
+              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Reliable Sources</h3>
+                <div className="space-y-3">
+                  {activeCampus.sources.map((source) => (
+                    <a
+                      key={source.url}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group"
+                    >
+                      <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{source.label}</span>
+                      <ExternalLink size={14} className="text-gray-500 group-hover:text-amber-500" />
+                    </a>
+                  ))}
+                </div>
+              </section>
             </div>
 
             {/* Right: Newsfeed */}
@@ -2245,7 +2367,7 @@ export default function App() {
 
         {/* Campus Detail Modal */}
         <AnimatePresence>
-          {selectedCampus && (
+          {showCampusModal && selectedCampus && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -2258,7 +2380,7 @@ export default function App() {
                     <CampusLogo slug={selectedCampus.slug} />
                   </div>
                   <button 
-                    onClick={() => setSelectedCampus(null)}
+                    onClick={() => { setShowCampusModal(false); setSelectedCampus(null); }}
                     className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
                   >
                     <X size={20} />
@@ -4208,7 +4330,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-auto scrollbar-hide fixed inset-0">
+    <div className="min-h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden overflow-y-auto scrollbar-hide">
       <AnimatePresence>
         {showSplash && (
           <motion.div
