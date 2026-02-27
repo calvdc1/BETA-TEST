@@ -52,6 +52,14 @@ try {
     PRIMARY KEY (user_id, room_id)
   );
 
+  CREATE TABLE IF NOT EXISTS message_reactions (
+    message_id INTEGER,
+    user_id INTEGER,
+    reaction TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (message_id, user_id)
+  );
+
   CREATE TABLE IF NOT EXISTS groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
@@ -136,6 +144,13 @@ try {
         last_read TEXT,
         PRIMARY KEY (user_id, room_id)
       );
+      CREATE TABLE IF NOT EXISTS message_reactions (
+        message_id INTEGER,
+        user_id INTEGER,
+        reaction TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (message_id, user_id)
+      );
       CREATE TABLE IF NOT EXISTS groups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
@@ -205,6 +220,7 @@ try { db.exec(`ALTER TABLE users ADD COLUMN cover_photo TEXT`); } catch {}
 try { db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_room_timestamp ON messages(room_id, timestamp DESC)`); } catch {}
 try { db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_sender_room ON messages(sender_id, room_id)`); } catch {}
 try { db.exec(`CREATE INDEX IF NOT EXISTS idx_deleted_messages_user_message ON deleted_messages(user_id, message_id)`); } catch {}
+try { db.exec(`CREATE INDEX IF NOT EXISTS idx_message_reactions_message ON message_reactions(message_id)`); } catch {}
 try { db.exec(`CREATE INDEX IF NOT EXISTS idx_presence_last_seen ON presence(last_seen)`); } catch {}
 try { db.exec(`CREATE INDEX IF NOT EXISTS idx_group_members_user_group ON group_members(user_id, group_id)`); } catch {}
 const groupsCount = db.prepare("SELECT COUNT(*) AS c FROM groups").get() as { c: number };
@@ -439,20 +455,58 @@ async function startServer() {
     const userId = Number(req.query.userId);
     const before = req.query.before as string | undefined;
     const pageSize = 50;
-    
+
     let rows: any[] = [];
     const queryBase = `
-      SELECT m.* FROM messages m
+      SELECT m.*,
+      COALESCE((SELECT COUNT(*) FROM message_reactions mr WHERE mr.message_id = m.id), 0) AS reaction_count,
+      (SELECT reaction FROM message_reactions mr2 WHERE mr2.message_id = m.id AND mr2.user_id = ?) AS user_reaction
+      FROM messages m
       LEFT JOIN deleted_messages dm ON m.id = dm.message_id AND dm.user_id = ?
       WHERE m.room_id = ? AND m.deleted_for_all = 0 AND dm.message_id IS NULL
     `;
 
     if (before) {
-      rows = db.prepare(`${queryBase} AND m.timestamp < ? ORDER BY m.timestamp DESC LIMIT ?`).all(userId, roomId, before, pageSize);
+      rows = db.prepare(`${queryBase} AND m.timestamp < ? ORDER BY m.timestamp DESC LIMIT ?`).all(userId, userId, roomId, before, pageSize);
     } else {
-      rows = db.prepare(`${queryBase} ORDER BY m.timestamp DESC LIMIT ?`).all(userId, roomId, pageSize);
+      rows = db.prepare(`${queryBase} ORDER BY m.timestamp DESC LIMIT ?`).all(userId, userId, roomId, pageSize);
     }
     res.json(rows.reverse());
+  });
+
+  app.post('/api/messages', (req, res) => {
+    const { senderId, senderName, content, roomId, mediaUrl, mediaType } = req.body || {};
+    if (!senderId || !senderName || !roomId || (!content && !mediaUrl)) {
+      return res.status(400).json({ success: false, message: 'Missing required message fields' });
+    }
+
+    const result = db
+      .prepare('INSERT INTO messages (sender_id, sender_name, content, room_id, media_url, media_type) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(senderId, senderName, content || '', roomId, mediaUrl || null, mediaType || null);
+
+    const saved = db.prepare('SELECT * FROM messages WHERE id = ?').get(result.lastInsertRowid);
+    res.json({ success: true, message: saved });
+  });
+
+  app.post('/api/messages/:id/react', (req, res) => {
+    const messageId = Number(req.params.id);
+    const userId = Number(req.body?.userId);
+    const reaction = String(req.body?.reaction || '').trim().slice(0, 8);
+    if (!Number.isFinite(messageId) || !Number.isFinite(userId)) return res.status(400).json({ success: false });
+
+    if (!reaction) {
+      db.prepare('DELETE FROM message_reactions WHERE message_id = ? AND user_id = ?').run(messageId, userId);
+    } else {
+      db.prepare(`
+        INSERT INTO message_reactions (message_id, user_id, reaction)
+        VALUES (?, ?, ?)
+        ON CONFLICT(message_id, user_id) DO UPDATE SET reaction = excluded.reaction, created_at = CURRENT_TIMESTAMP
+      `).run(messageId, userId, reaction);
+    }
+
+    const row = db.prepare('SELECT COUNT(*) as reaction_count FROM message_reactions WHERE message_id = ?').get(messageId) as { reaction_count: number };
+    const own = db.prepare('SELECT reaction FROM message_reactions WHERE message_id = ? AND user_id = ?').get(messageId, userId) as { reaction?: string } | undefined;
+    res.json({ success: true, reaction_count: row.reaction_count, user_reaction: own?.reaction || null });
   });
 
   app.delete("/api/messages/:id", (req, res) => {
