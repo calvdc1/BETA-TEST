@@ -455,7 +455,10 @@ const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, class
 };
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('onemsu_splash_seen') !== 'true';
+  });
   const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onemsu_view');
@@ -468,11 +471,15 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (!showSplash) return;
+
     const timer = setTimeout(() => {
       setShowSplash(false);
+      localStorage.setItem('onemsu_splash_seen', 'true');
     }, 10000);
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [showSplash]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_view', view);
