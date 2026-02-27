@@ -87,14 +87,25 @@ try {
 
   CREATE TABLE IF NOT EXISTS lost_found_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    title TEXT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
     description TEXT,
     location TEXT,
-    type TEXT DEFAULT 'lost',
-    status TEXT DEFAULT 'open',
+    type TEXT CHECK(type IN ('lost', 'found')) NOT NULL DEFAULT 'lost',
+    status TEXT CHECK(status IN ('open', 'claimed')) NOT NULL DEFAULT 'open',
     image_url TEXT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS schedules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    details TEXT,
+    schedule_date TEXT NOT NULL,
+    schedule_time TEXT NOT NULL,
+    location TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
 } catch (err: any) {
@@ -156,14 +167,24 @@ try {
       );
       CREATE TABLE IF NOT EXISTS lost_found_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        title TEXT,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
         description TEXT,
         location TEXT,
-        type TEXT DEFAULT 'lost',
-        status TEXT DEFAULT 'open',
+        type TEXT CHECK(type IN ('lost', 'found')) NOT NULL DEFAULT 'lost',
+        status TEXT CHECK(status IN ('open', 'claimed')) NOT NULL DEFAULT 'open',
         image_url TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS schedules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT,
+        schedule_date TEXT NOT NULL,
+        schedule_time TEXT NOT NULL,
+        location TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
   } else {
@@ -299,29 +320,56 @@ async function startServer() {
   app.post("/api/freedomwall", (req, res) => {
     const { userId, content, campus, imageUrl, alias } = req.body;
     if (!content || !campus) return res.status(400).json({ success: false, message: "Missing content or campus" });
-    const postAlias = String(alias || 'ONEMSU').slice(0, 40).trim() || 'ONEMSU';
-    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, postAlias, content, campus, imageUrl || null);
+    const alias = "ONEMSU";
+    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, alias, content, campus, imageUrl || null);
     const item = db.prepare("SELECT * FROM freedom_posts WHERE id = ?").get(info.lastInsertRowid);
     res.json({ success: true, item });
   });
 
-  app.get('/api/lostfound', (_req, res) => {
-    const rows = db.prepare('SELECT * FROM lost_found_posts ORDER BY timestamp DESC LIMIT 100').all();
-    res.json(rows);
+  app.get('/api/lostfound', (req, res) => {
+    const items = db.prepare('SELECT * FROM lost_found_posts ORDER BY timestamp DESC LIMIT 100').all();
+    res.json(items);
   });
 
   app.post('/api/lostfound', (req, res) => {
     const { userId, title, description, location, type, imageUrl } = req.body;
     if (!userId || !title) {
-      return res.status(400).json({ success: false, message: 'Missing userId or title' });
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
-    const postType = type === 'found' ? 'found' : 'lost';
+    const safeType = type === 'found' ? 'found' : 'lost';
     const info = db.prepare(`
-      INSERT INTO lost_found_posts (user_id, title, description, location, type, status, image_url)
-      VALUES (?, ?, ?, ?, ?, 'open', ?)
-    `).run(userId, title, description || '', location || '', postType, imageUrl || null);
+      INSERT INTO lost_found_posts (user_id, title, description, location, type, image_url)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(userId, title, description || '', location || '', safeType, imageUrl || null);
     const item = db.prepare('SELECT * FROM lost_found_posts WHERE id = ?').get(info.lastInsertRowid);
     res.json({ success: true, item });
+  });
+
+  app.get('/api/schedules', (req, res) => {
+    const userId = Number(req.query.userId);
+    if (!Number.isFinite(userId)) return res.status(400).json({ success: false, message: 'Missing userId' });
+    const rows = db.prepare('SELECT * FROM schedules WHERE user_id = ? ORDER BY schedule_date ASC, schedule_time ASC').all(userId);
+    res.json({ success: true, items: rows });
+  });
+
+  app.post('/api/schedules', (req, res) => {
+    const { userId, title, details, scheduleDate, scheduleTime, location } = req.body;
+    if (!userId || !title || !scheduleDate || !scheduleTime) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+    const info = db.prepare(`
+      INSERT INTO schedules (user_id, title, details, schedule_date, schedule_time, location)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(userId, title, details || '', scheduleDate, scheduleTime, location || '');
+    const item = db.prepare('SELECT * FROM schedules WHERE id = ?').get(info.lastInsertRowid);
+    res.json({ success: true, item });
+  });
+
+  app.delete('/api/schedules/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const userId = Number(req.query.userId);
+    const info = db.prepare('DELETE FROM schedules WHERE id = ? AND user_id = ?').run(id, userId);
+    res.json({ success: info.changes > 0 });
   });
   app.post("/api/freedomwall/:id/react", (req, res) => {
     const id = Number(req.params.id);
