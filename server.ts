@@ -84,6 +84,18 @@ try {
     reports INTEGER DEFAULT 0,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS lost_found_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    title TEXT,
+    description TEXT,
+    location TEXT,
+    type TEXT DEFAULT 'lost',
+    status TEXT DEFAULT 'open',
+    image_url TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 } catch (err: any) {
   if (err && err.code === "SQLITE_NOTADB") {
@@ -140,6 +152,17 @@ try {
         image_url TEXT,
         likes INTEGER DEFAULT 0,
         reports INTEGER DEFAULT 0,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS lost_found_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        title TEXT,
+        description TEXT,
+        location TEXT,
+        type TEXT DEFAULT 'lost',
+        status TEXT DEFAULT 'open',
+        image_url TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -274,11 +297,30 @@ async function startServer() {
     res.json(rows);
   });
   app.post("/api/freedomwall", (req, res) => {
-    const { userId, content, campus, imageUrl } = req.body;
+    const { userId, content, campus, imageUrl, alias } = req.body;
     if (!content || !campus) return res.status(400).json({ success: false, message: "Missing content or campus" });
-    const alias = `Anon-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, alias, content, campus, imageUrl || null);
+    const postAlias = String(alias || 'ONEMSU').slice(0, 40).trim() || 'ONEMSU';
+    const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, postAlias, content, campus, imageUrl || null);
     const item = db.prepare("SELECT * FROM freedom_posts WHERE id = ?").get(info.lastInsertRowid);
+    res.json({ success: true, item });
+  });
+
+  app.get('/api/lostfound', (_req, res) => {
+    const rows = db.prepare('SELECT * FROM lost_found_posts ORDER BY timestamp DESC LIMIT 100').all();
+    res.json(rows);
+  });
+
+  app.post('/api/lostfound', (req, res) => {
+    const { userId, title, description, location, type, imageUrl } = req.body;
+    if (!userId || !title) {
+      return res.status(400).json({ success: false, message: 'Missing userId or title' });
+    }
+    const postType = type === 'found' ? 'found' : 'lost';
+    const info = db.prepare(`
+      INSERT INTO lost_found_posts (user_id, title, description, location, type, status, image_url)
+      VALUES (?, ?, ?, ?, ?, 'open', ?)
+    `).run(userId, title, description || '', location || '', postType, imageUrl || null);
+    const item = db.prepare('SELECT * FROM lost_found_posts WHERE id = ?').get(info.lastInsertRowid);
     res.json({ success: true, item });
   });
   app.post("/api/freedomwall/:id/react", (req, res) => {

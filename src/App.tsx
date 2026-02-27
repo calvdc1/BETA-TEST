@@ -42,7 +42,10 @@ import {
   Mic,
   Video,
   PhoneOff,
-  Monitor
+  Monitor,
+  Download,
+  CalendarDays,
+  StickyNote
 } from 'lucide-react';
 
 // --- Types ---
@@ -314,33 +317,6 @@ const SPARKLES = [
   { top: "82%", left: "60%" },
 ];
 
-const WELCOME_SCENES = [
-  {
-    title: 'Welcome to ONEMSU',
-    text: 'Your digital hub connecting students across the Mindanao State University system.',
-    tips: ['Explore campuses and official links', 'Join communities and groups', 'Use one account for updates and messaging']
-  },
-  {
-    title: 'Campus Explorer Guide',
-    text: 'Use Explorer to compare campuses, verify trusted sources, and open 3D campus map views.',
-    tips: ['Tap any campus in the left panel', 'Open Reliable Sources for official pages', 'Use 3D Campus Map for immersive view']
-  },
-  {
-    title: 'Social + Messenger',
-    text: 'Post on the freedom wall, join groups, and chat in real-time with classmates and organizations.',
-    tips: ['Use Messenger for direct and group channels', 'Join campus-based organizations', 'Share feedback to improve the platform']
-  },
-  {
-    title: 'Stay Safe and Verified',
-    text: 'Always rely on official campus links and verify announcements before sharing.',
-    tips: ['Check source badges before opening links', 'Protect your account credentials', 'Report suspicious posts in-app']
-  },
-  {
-    title: "Let's Get Started",
-    text: 'Navigate to Explorer, Dashboard, and Messenger anytime from the top menu.',
-    tips: ['Complete your profile', 'Follow your campus updates', 'Invite classmates to ONEMSU']
-  }
-] as const;
 
 // --- Components ---
 
@@ -616,10 +592,7 @@ const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, class
 };
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem('onemsu_splash_seen') !== 'true';
-  });
+  const [showSplash, setShowSplash] = useState(true);
   const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onemsu_view');
@@ -633,9 +606,6 @@ export default function App() {
 
   useEffect(() => {
     if (!showSplash) return;
-
-    // Mark splash as seen immediately so refresh won't replay it.
-    localStorage.setItem('onemsu_splash_seen', 'true');
 
     const timer = setTimeout(() => {
       setShowSplash(false);
@@ -658,29 +628,7 @@ export default function App() {
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [welcomeSecond, setWelcomeSecond] = useState(60);
 
-  useEffect(() => {
-    if (showSplash) return;
-    setShowWelcome(true);
-    setWelcomeSecond(60);
-  }, [showSplash]);
-
-  useEffect(() => {
-    if (!showWelcome) return;
-    const timer = setInterval(() => {
-      setWelcomeSecond((prev) => {
-        if (prev <= 1) {
-          setShowWelcome(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [showWelcome]);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('onemsu_auth') === 'true';
@@ -723,6 +671,7 @@ export default function App() {
   const [freedomPosts, setFreedomPosts] = useState<{ id: number; user_id: number | null; alias: string; content: string; campus: string; image_url?: string; likes: number; reports: number; timestamp: string }[]>([]);
   const [freedomText, setFreedomText] = useState('');
   const [freedomImagePreview, setFreedomImagePreview] = useState<string | null>(null);
+  const [confessionAlias, setConfessionAlias] = useState('ONEMSU');
   const isOwner = (email?: string) => email === 'xandercamarin@gmail.com' || email === 'sophiakayeaninao@gmail.com';
   const isVerified = (email?: string) => isOwner(email) || email === 'krisandrea.gonzaga@g.msuiit.edu.ph' || email === 'marcoalfons.bollozos@g.msuiit.edu.ph';
   const [selectedGroup, setSelectedGroup] = useState<{ id: number; name: string; description: string; campus: string; logo_url?: string } | null>(null);
@@ -817,6 +766,17 @@ export default function App() {
     } catch { return []; }
   });
 
+
+  const [schedulerItems, setSchedulerItems] = useState<{ id: string; title: string; date: string; note: string }[]>(() => {
+    try {
+      const key = typeof window !== 'undefined'
+        ? (user ? `onemsu_sched_${user.id}` : 'onemsu_sched_guest')
+        : 'onemsu_sched_guest';
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
   const safeJson = async (r: Response) => {
     try {
       const t = await r.text();
@@ -853,6 +813,11 @@ export default function App() {
       localStorage.setItem(`onemsu_dms_${user.id}`, JSON.stringify(directMessageList));
     }
   }, [directMessageList, user]);
+
+  useEffect(() => {
+    const key = user ? `onemsu_sched_${user.id}` : 'onemsu_sched_guest';
+    localStorage.setItem(key, JSON.stringify(schedulerItems));
+  }, [schedulerItems, user]);
 
   const addToDMList = (otherUser: { id: number; name: string; avatar?: string; campus?: string }) => {
     setDirectMessageList(prev => {
@@ -1202,7 +1167,8 @@ export default function App() {
       setTypingUsers(prev => ({ ...prev, [activeRoom]: ['JARVIS'] }));
       
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "AIzaSyAF2nzTlCtgouiM6n0StTEiWl9nzfCkZMc" });
+        const envKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY as string | undefined;
+        const ai = envKey ? new GoogleGenAI({ apiKey: envKey }) : null;
         
         // Build conversation history for context
         const history = messages
@@ -1236,7 +1202,7 @@ export default function App() {
           Campus: ${user.campus || 'Global'}
         `;
 
-        const response = await ai.models.generateContent({
+        const response = ai ? await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: [
             ...history,
@@ -1247,9 +1213,15 @@ export default function App() {
             temperature: 0.7,
             thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
           }
-        });
-        
-        const aiResponse = response.text || "I'm having trouble processing that request right now, Sir.";
+        }) : null;
+
+        const quickFallback = text.toLowerCase().includes('hello')
+          ? `Hello ${user.name}, JARVIS online. Ask me about schedules, studies, or campus updates.`
+          : text.toLowerCase().includes('schedule')
+            ? 'You can use the Scheduler card in Dashboard Quick Actions to plan classes and reminders.'
+            : 'JARVIS text fallback mode is active. Add VITE_GEMINI_API_KEY to enable full AI responses.';
+
+        const aiResponse = response?.text || quickFallback;
         
         setTypingUsers(prev => ({ ...prev, [activeRoom]: [] }));
         
@@ -1773,7 +1745,9 @@ export default function App() {
                   { name: 'Updates', icon: <MessageSquare size={14} />, action: () => setView('newsfeed'), unread: updatesUnread },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
-                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') }
+                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
+                  { name: 'Notes', icon: <StickyNote size={14} />, action: () => document.getElementById('notes-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+                  { name: 'Scheduler', icon: <CalendarDays size={14} />, action: () => document.getElementById('scheduler-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
                 ].map(item => (
                   <button 
                     key={item.name} 
@@ -1802,7 +1776,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
+            <div id="notes-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-bold flex items-center gap-2"><BookOpen size={18} className="text-amber-500" /> Notes</h4>
                 <button
@@ -1855,6 +1829,45 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div id="scheduler-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold flex items-center gap-2"><CalendarDays size={18} className="text-amber-500" /> Scheduler</h4>
+                <button
+                  onClick={() => setSchedulerItems(prev => [{ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: 'New Schedule', date: new Date().toISOString().slice(0, 10), note: '' }, ...prev])}
+                  className="p-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20"
+                  title="Add schedule"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-hide">
+                {schedulerItems.length === 0 && <p className="text-sm text-gray-500">No schedules yet. Add one from Quick Actions.</p>}
+                {schedulerItems.map(item => (
+                  <div key={item.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
+                    <input
+                      value={item.title}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, title: e.target.value } : x))}
+                      className="w-full mb-2 bg-transparent text-sm font-semibold text-white outline-none"
+                      placeholder="Schedule title"
+                    />
+                    <input
+                      type="date"
+                      value={item.date}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, date: e.target.value } : x))}
+                      className="w-full mb-2 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-200"
+                    />
+                    <textarea
+                      rows={2}
+                      value={item.note}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, note: e.target.value } : x))}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-300"
+                      placeholder="Notes"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -3357,6 +3370,30 @@ export default function App() {
     }
   };
 
+  const idCardRef = useRef<HTMLDivElement | null>(null);
+
+  const handleDownloadId = () => {
+    if (!user) return;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1000' height='630'>
+      <rect width='1000' height='630' fill='#111111' rx='24'/>
+      <rect x='0' y='0' width='1000' height='110' fill='#f59e0b'/>
+      <text x='40' y='70' fill='#111' font-size='36' font-family='Arial' font-weight='700'>Mindanao State University - Digital ID</text>
+      <text x='40' y='200' fill='#f5f5f5' font-size='56' font-family='Arial' font-weight='700'>${(user.name || 'Student').replace(/&/g, '&amp;')}</text>
+      <text x='40' y='270' fill='#bbbbbb' font-size='32' font-family='Arial'>Student ID: ${(user.student_id || 'N/A').replace(/&/g, '&amp;')}</text>
+      <text x='40' y='320' fill='#bbbbbb' font-size='28' font-family='Arial'>Campus: ${(user.campus || 'MSU System').replace(/&/g, '&amp;')}</text>
+      <text x='40' y='365' fill='#bbbbbb' font-size='28' font-family='Arial'>Program: ${(user.program || 'Not Set').replace(/&/g, '&amp;')}</text>
+      <text x='40' y='410' fill='#bbbbbb' font-size='28' font-family='Arial'>Year Level: ${(user.year_level || 'Not Set').replace(/&/g, '&amp;')}</text>
+      <text x='40' y='560' fill='#8f8f8f' font-size='22' font-family='Arial'>Generated: ${new Date().toLocaleString().replace(/&/g, '&amp;')}</text>
+    </svg>`;
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `onemsu-id-${user.id}.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const renderProfile = () => (
     <div className="h-full w-full bg-[#0a0502] text-gray-200 p-4 md:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-4xl mx-auto pb-20">
@@ -3370,6 +3407,7 @@ export default function App() {
         {/* ID Card Design */}
         <div className="relative group">
           <motion.div 
+            ref={idCardRef}
             initial={{ rotateY: -10, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
             className="w-full max-w-md mx-auto aspect-[1.58/1] bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] rounded-3xl border-2 border-white/10 shadow-2xl overflow-hidden relative preserve-3d"
@@ -3447,7 +3485,7 @@ export default function App() {
                 <div className="mt-4 text-center">
                   <div className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-1">Student ID</div>
                   <div className="text-sm font-mono font-bold text-white tracking-widest">
-                    {user?.student_id || '2024-XXXX'}
+                    {(profileData?.student_id || user?.student_id) || '2024-XXXX'}
                   </div>
                 </div>
               </div>
@@ -3457,20 +3495,20 @@ export default function App() {
                 <div>
                   <div className="text-[10px] text-amber-500 font-black uppercase tracking-[0.2em] mb-1">Full Name</div>
                   <h4 className="text-xl font-black text-white uppercase tracking-tight leading-tight mb-4">
-                    {user?.name || 'Student Name'}
+                    {profileData?.name || user?.name || 'Student Name'}
                   </h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Course / Program</div>
                       <p className="text-[10px] font-bold text-gray-200 uppercase truncate">
-                        {user?.program || 'Not Set'}
+                        {profileData?.program || user?.program || 'Not Set'}
                       </p>
                     </div>
                     <div>
                       <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Year Level</div>
                       <p className="text-[10px] font-bold text-gray-200 uppercase">
-                        {user?.year_level ? `${user.year_level} Year` : 'Not Set'}
+                        {(profileData?.year_level || user?.year_level) ? `${profileData?.year_level || user?.year_level} Year` : 'Not Set'}
                       </p>
                     </div>
                   </div>
@@ -3480,7 +3518,7 @@ export default function App() {
                   <div>
                     <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Campus</div>
                     <p className="text-[10px] font-bold text-amber-500 uppercase">
-                      {user?.campus || 'MSU System'}
+                      {profileData?.campus || user?.campus || 'MSU System'}
                     </p>
                   </div>
                   <div className="w-12 h-12 opacity-20">
@@ -3502,8 +3540,8 @@ export default function App() {
             >
               {profileEditing ? 'Close Editor' : 'Update ID Details'}
             </button>
-            <button className="px-8 py-3 rounded-2xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
-              Download Digital ID
+            <button onClick={handleDownloadId} className="px-8 py-3 rounded-2xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2">
+              <Download size={16} /> Download Digital ID
             </button>
           </div>
         </div>
@@ -3514,7 +3552,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-12 p-8 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl"
           >
-            <ProfileForm user={user} onSaved={(u) => { setUser(u); setProfileEditing(false); }} />
+            <ProfileForm user={user} onSaved={(u) => { setUser(u); setProfileData(u); setProfileEditing(false); }} />
           </motion.div>
         )}
       </div>
@@ -3716,9 +3754,16 @@ export default function App() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Create a Post</h3>
-              <p className="text-xs text-gray-500">Your identity will be hidden behind an anonymous alias.</p>
+              <p className="text-xs text-gray-500">Post with your preferred nickname (default: ONEMSU).</p>
             </div>
           </div>
+
+          <input
+            value={confessionAlias}
+            onChange={(e) => setConfessionAlias(e.target.value.slice(0, 40))}
+            placeholder="Nickname"
+            className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all mb-4"
+          />
 
           <textarea
             value={freedomText}
@@ -3771,7 +3816,7 @@ export default function App() {
                 const res = await fetch('/api/freedomwall', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId: user.id, content: freedomText.trim(), campus: user.campus || 'Global', imageUrl })
+                  body: JSON.stringify({ userId: user.id, alias: confessionAlias || 'ONEMSU', content: freedomText.trim(), campus: user.campus || 'Global', imageUrl })
                 }).then(r => r.json());
                 if (res.success) {
                   setFreedomText('');
@@ -4607,55 +4652,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showWelcome && !showSplash && (
-          <motion.div
-            key="welcome-presentation"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ y: 20, scale: 0.98 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: 12, scale: 0.98 }}
-              className="w-full max-w-3xl card-gold rounded-3xl p-6 md:p-10"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl md:text-3xl font-black text-metallic-gold">{WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].title}</h2>
-                <button onClick={() => setShowWelcome(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-bold hover:bg-white/20">Skip</button>
-              </div>
-
-              <p className="text-gray-300 mb-5 leading-relaxed">
-                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].text}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].tips.map((tip) => (
-                  <div key={tip} className="p-3 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-200">
-                    {tip}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                  <span>Welcome presentation (60s)</span>
-                  <span>{welcomeSecond}s left</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 transition-all duration-500" style={{ width: `${((60 - welcomeSecond) / 60) * 100}%` }} />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button onClick={() => setShowWelcome(false)} className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold hover:bg-white/20">Start Exploring</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {view === 'home' && (
