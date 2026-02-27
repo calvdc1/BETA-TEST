@@ -616,14 +616,11 @@ const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, class
 };
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem('onemsu_splash_seen') !== 'true';
-  });
-  const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound'>(() => {
+  const [showSplash, setShowSplash] = useState(true);
+  const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound' | 'scheduler'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onemsu_view');
-      const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound'];
+      const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound', 'scheduler'];
       if (saved && validViews.includes(saved)) {
         return saved as any;
       }
@@ -634,12 +631,9 @@ export default function App() {
   useEffect(() => {
     if (!showSplash) return;
 
-    // Mark splash as seen immediately so refresh won't replay it.
-    localStorage.setItem('onemsu_splash_seen', 'true');
-
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 10000);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, [showSplash]);
@@ -662,25 +656,8 @@ export default function App() {
   const [welcomeSecond, setWelcomeSecond] = useState(60);
 
   useEffect(() => {
-    if (showSplash) return;
-    setShowWelcome(true);
-    setWelcomeSecond(60);
-  }, [showSplash]);
-
-  useEffect(() => {
-    if (!showWelcome) return;
-    const timer = setInterval(() => {
-      setWelcomeSecond((prev) => {
-        if (prev <= 1) {
-          setShowWelcome(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [showWelcome]);
+    setShowWelcome(false);
+  }, []);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('onemsu_auth') === 'true';
@@ -807,6 +784,10 @@ export default function App() {
       return saved ? JSON.parse(saved) : {};
     } catch { return {}; }
   });
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+  const [schedulerForm, setSchedulerForm] = useState({ title: '', details: '', scheduleDate: '', scheduleTime: '', location: '' });
+  const [scheduleItems, setScheduleItems] = useState<any[]>([]);
+
   const [stickyNotes, setStickyNotes] = useState<{ id: string; content: string; color: string; createdAt: string }[]>(() => {
     try {
       const key = typeof window !== 'undefined'
@@ -1136,6 +1117,14 @@ export default function App() {
       localStorage.setItem(key, JSON.stringify(stickyNotes));
     } catch {}
   }, [stickyNotes, user]);
+
+
+  useEffect(() => {
+    if (!user || view !== 'scheduler') return;
+    fetch(`/api/schedules?userId=${user.id}`).then(r => r.json()).then(res => {
+      if (res.success) setScheduleItems(res.items || []);
+    });
+  }, [user, view]);
   useEffect(() => {
     try {
       const key = user ? `onemsu_stickies_${user.id}` : 'onemsu_stickies_guest';
@@ -1265,6 +1254,7 @@ export default function App() {
         };
         
         setMessages(prev => [...prev, aiMsg as any]);
+        speakText(aiResponse);
         
         // Scroll to bottom
         setTimeout(() => {
@@ -1274,15 +1264,17 @@ export default function App() {
       } catch (error) {
         console.error("AI Error:", error);
         setTypingUsers(prev => ({ ...prev, [activeRoom]: [] }));
-        setMessages(prev => [...prev, {
+        const fallbackMessage = {
           id: `ai-err-${Date.now()}`,
           sender_id: 0,
           sender_name: 'ONEMSU AI',
-          content: "Sorry, I encountered an error connecting to my brain.",
+          content: 'JARVIS fallback: I am online in limited mode right now. I can still help with your schedule, campus info, and app navigation.',
           roomId: activeRoom,
           room_id: activeRoom,
           timestamp: new Date().toISOString()
-        } as any]);
+        } as any;
+        setMessages(prev => [...prev, fallbackMessage]);
+        speakText(fallbackMessage.content);
       } finally {
         setIsSending(false);
       }
@@ -1717,8 +1709,9 @@ export default function App() {
                 <p className="text-gray-400 text-xs leading-relaxed mb-4">
                   Your advanced AI companion. Ask anything about MSU, academics, or general knowledge.
                 </p>
-                <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold">
-                  Launch Assistant <ArrowRight size={14} />
+                <div className="flex items-center justify-between gap-2 text-indigo-400 text-xs font-bold">
+                  <span className="flex items-center gap-2">Launch Assistant <ArrowRight size={14} /></span>
+                  <button onClick={(e) => { e.stopPropagation(); setSpeechEnabled(v => !v); }} className="px-2 py-1 rounded bg-white/10 text-[10px] text-white">{speechEnabled ? 'Voice On' : 'Voice Off'}</button>
                 </div>
               </div>
               {/* Decorative AI lines */}
@@ -1770,6 +1763,11 @@ export default function App() {
                   { name: 'Finance', icon: <ShieldCheck size={14} /> },
                   { name: 'Discord', icon: <ExternalLink size={14} />, action: () => window.open('https://discord.gg/gjuygmrPnR', '_blank') },
                   { name: 'Profile', icon: <Users size={14} />, action: () => setView('profile') },
+                  { name: 'Scheduler', icon: <Clock size={14} />, action: () => setView('scheduler') },
+                  { name: 'Quick Note', icon: <BookOpen size={14} />, action: () => {
+                    const id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+                    setStickyNotes(prev => [{ id, content: '', color: 'bg-amber-500/20 border-amber-500/30', createdAt: new Date().toISOString() }, ...prev]);
+                  } },
                   { name: 'Updates', icon: <MessageSquare size={14} />, action: () => setView('newsfeed'), unread: updatesUnread },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
@@ -3357,7 +3355,57 @@ export default function App() {
     }
   };
 
-  const renderProfile = () => (
+  const idCardRef = useRef<HTMLDivElement | null>(null);
+
+  const downloadDigitalId = async () => {
+    const profile = profileData || user;
+    if (!profile) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 760;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#1a1a1a');
+    gradient.addColorStop(1, '#0d0d0d');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#d4a32a';
+    ctx.fillRect(0, 0, canvas.width, 140);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 42px Arial';
+    ctx.fillText('MINDANAO STATE UNIVERSITY', 36, 70);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('SYSTEM DIGITAL ID', 36, 108);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 54px Arial';
+    ctx.fillText((profile.name || 'Student Name').toUpperCase(), 320, 255);
+    ctx.font = 'bold 30px Arial';
+    ctx.fillStyle = '#d4a32a';
+    ctx.fillText(`Student ID: ${profile.student_id || 'N/A'}`, 320, 315);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`Program: ${profile.program || 'N/A'}`, 320, 365);
+    ctx.fillText(`Year Level: ${profile.year_level || 'N/A'}`, 320, 415);
+    ctx.fillText(`Campus: ${profile.campus || 'N/A'}`, 320, 465);
+
+    ctx.fillStyle = 'rgba(212,163,42,0.2)';
+    ctx.fillRect(36, 180, 240, 280);
+    ctx.fillStyle = '#d4a32a';
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText((profile.name || 'U')[0].toUpperCase(), 140, 330);
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `${(profile.name || 'onemsu').replace(/\s+/g, '-').toLowerCase()}-digital-id.png`;
+    link.click();
+  };
+
+  const renderProfile = () => {
+    const profile = profileData || user;
+    return (
     <div className="h-full w-full bg-[#0a0502] text-gray-200 p-4 md:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-4xl mx-auto pb-20">
         <header className="flex justify-between items-center mb-12">
@@ -3372,6 +3420,7 @@ export default function App() {
           <motion.div 
             initial={{ rotateY: -10, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
+            ref={idCardRef}
             className="w-full max-w-md mx-auto aspect-[1.58/1] bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] rounded-3xl border-2 border-white/10 shadow-2xl overflow-hidden relative preserve-3d"
           >
             {/* Background Pattern */}
@@ -3399,8 +3448,8 @@ export default function App() {
               {/* Profile Picture Area */}
               <div className="shrink-0">
                 <div className="w-32 h-32 rounded-2xl border-4 border-white/10 overflow-hidden bg-black/40 relative group/pic">
-                  {(tempAvatar || user?.avatar) ? (
-                    <img src={tempAvatar || user.avatar} alt="" className="w-full h-full object-cover" />
+                  {(tempAvatar || profile?.avatar) ? (
+                    <img src={tempAvatar || profile?.avatar} alt="" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl font-black text-amber-500/20">
                       {user?.name?.[0] || 'M'}
@@ -3447,7 +3496,7 @@ export default function App() {
                 <div className="mt-4 text-center">
                   <div className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-1">Student ID</div>
                   <div className="text-sm font-mono font-bold text-white tracking-widest">
-                    {user?.student_id || '2024-XXXX'}
+                    {profile?.student_id || '2024-XXXX'}
                   </div>
                 </div>
               </div>
@@ -3457,20 +3506,20 @@ export default function App() {
                 <div>
                   <div className="text-[10px] text-amber-500 font-black uppercase tracking-[0.2em] mb-1">Full Name</div>
                   <h4 className="text-xl font-black text-white uppercase tracking-tight leading-tight mb-4">
-                    {user?.name || 'Student Name'}
+                    {profile?.name || 'Student Name'}
                   </h4>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Course / Program</div>
                       <p className="text-[10px] font-bold text-gray-200 uppercase truncate">
-                        {user?.program || 'Not Set'}
+                        {profile?.program || 'Not Set'}
                       </p>
                     </div>
                     <div>
                       <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Year Level</div>
                       <p className="text-[10px] font-bold text-gray-200 uppercase">
-                        {user?.year_level ? `${user.year_level} Year` : 'Not Set'}
+                        {profile?.year_level ? `${profile.year_level} Year` : 'Not Set'}
                       </p>
                     </div>
                   </div>
@@ -3480,7 +3529,7 @@ export default function App() {
                   <div>
                     <div className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">Campus</div>
                     <p className="text-[10px] font-bold text-amber-500 uppercase">
-                      {user?.campus || 'MSU System'}
+                      {profile?.campus || 'MSU System'}
                     </p>
                   </div>
                   <div className="w-12 h-12 opacity-20">
@@ -3502,7 +3551,7 @@ export default function App() {
             >
               {profileEditing ? 'Close Editor' : 'Update ID Details'}
             </button>
-            <button className="px-8 py-3 rounded-2xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
+            <button onClick={downloadDigitalId} className="px-8 py-3 rounded-2xl bg-amber-500 text-black font-bold text-sm hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
               Download Digital ID
             </button>
           </div>
@@ -3520,6 +3569,7 @@ export default function App() {
       </div>
     </div>
   );
+  };
 
   const [lostFoundItems, setLostFoundItems] = useState<{ id: number; title: string; description: string; location: string; type: 'lost' | 'found'; status: 'open' | 'claimed'; timestamp: string; image_url?: string; user_id: number }[]>([]);
   const [lostFoundForm, setLostFoundForm] = useState({ title: '', description: '', location: '', type: 'lost' as 'lost' | 'found', imagePreview: null as string | null });
@@ -3696,13 +3746,77 @@ export default function App() {
     </div>
   );
 
+  const renderScheduler = () => (
+    <div className="min-h-screen bg-[#0a0502] text-gray-200 p-6 md:p-12 overflow-y-auto scrollbar-hide">
+      <div className="max-w-5xl mx-auto pb-20">
+        <header className="flex justify-between items-center mb-12">
+          <div>
+            <h2 className="text-4xl font-black text-white tracking-tight">Student <span className="text-amber-500">Scheduler</span></h2>
+            <p className="text-gray-500 text-sm mt-1">Plan classes, deadlines, and campus tasks in one place.</p>
+          </div>
+          <button onClick={() => setView('dashboard')} className="p-3 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all hover:scale-110">
+            <X size={24} />
+          </button>
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 p-6 rounded-3xl bg-white/5 border border-white/10">
+            <h3 className="font-bold text-white mb-4">Create Schedule</h3>
+            <div className="space-y-3">
+              <input value={schedulerForm.title} onChange={(e) => setSchedulerForm(prev => ({ ...prev, title: e.target.value }))} placeholder="Title" className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm" />
+              <textarea value={schedulerForm.details} onChange={(e) => setSchedulerForm(prev => ({ ...prev, details: e.target.value }))} placeholder="Details" className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm min-h-24" />
+              <input type="date" value={schedulerForm.scheduleDate} onChange={(e) => setSchedulerForm(prev => ({ ...prev, scheduleDate: e.target.value }))} className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm" />
+              <input type="time" value={schedulerForm.scheduleTime} onChange={(e) => setSchedulerForm(prev => ({ ...prev, scheduleTime: e.target.value }))} className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm" />
+              <input value={schedulerForm.location} onChange={(e) => setSchedulerForm(prev => ({ ...prev, location: e.target.value }))} placeholder="Location" className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm" />
+              <button
+                onClick={async () => {
+                  if (!user || !schedulerForm.title || !schedulerForm.scheduleDate || !schedulerForm.scheduleTime) return;
+                  const res = await fetch('/api/schedules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, ...schedulerForm })
+                  }).then(r => r.json());
+                  if (res.success) {
+                    setScheduleItems(prev => [...prev, res.item].sort((a, b) => `${a.schedule_date} ${a.schedule_time}`.localeCompare(`${b.schedule_date} ${b.schedule_time}`)));
+                    setSchedulerForm({ title: '', details: '', scheduleDate: '', scheduleTime: '', location: '' });
+                  }
+                }}
+                className="w-full py-3 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400"
+              >Save Schedule</button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 space-y-4">
+            {scheduleItems.map((item) => (
+              <div key={item.id} className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-lg font-bold text-white">{item.title}</p>
+                    <p className="text-xs text-amber-500 mt-1">{item.schedule_date} • {item.schedule_time}{item.location ? ` • ${item.location}` : ''}</p>
+                    {item.details && <p className="text-sm text-gray-300 mt-3">{item.details}</p>}
+                  </div>
+                  <button onClick={async () => {
+                    if (!user) return;
+                    const res = await fetch(`/api/schedules/${item.id}?userId=${user.id}`, { method: 'DELETE' }).then(r => r.json());
+                    if (res.success) setScheduleItems(prev => prev.filter(x => x.id !== item.id));
+                  }} className="px-3 py-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">Delete</button>
+                </div>
+              </div>
+            ))}
+            {scheduleItems.length === 0 && <div className="text-center text-gray-500 py-14 border border-dashed border-white/10 rounded-3xl">No schedules yet.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderConfession = () => (
     <div className="h-full w-full bg-[#0a0502] text-gray-200 p-4 md:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-4xl mx-auto pb-20">
         <header className="flex justify-between items-center mb-12">
           <div>
             <h2 className="text-4xl font-black text-white tracking-tight">Freedom <span className="text-amber-500">Wall</span></h2>
-            <p className="text-gray-500 text-sm mt-1">Share your thoughts anonymously with the MSU community.</p>
+            <p className="text-gray-500 text-sm mt-1">Post as ONEMSU and share your voice with the MSU community.</p>
           </div>
           <button onClick={() => setView('dashboard')} className="p-3 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all hover:scale-110">
             <X size={24} />
@@ -3716,7 +3830,7 @@ export default function App() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Create a Post</h3>
-              <p className="text-xs text-gray-500">Your identity will be hidden behind an anonymous alias.</p>
+              <p className="text-xs text-gray-500">Posts in this wall are published with nickname: ONEMSU.</p>
             </div>
           </div>
 
@@ -3781,7 +3895,7 @@ export default function App() {
               }}
               className="px-8 py-3 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition-all shadow-lg shadow-amber-900/20 active:scale-95"
             >
-              Post Anonymously
+              Post as ONEMSU
             </button>
           </div>
 
@@ -3870,6 +3984,15 @@ export default function App() {
       </div>
     </div>
   );
+  const speakText = (text: string) => {
+    if (!speechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const [isTypingLocal, setIsTypingLocal] = useState(false);
   const typingTimeoutRef = useRef<any>(null);
 
@@ -4755,6 +4878,17 @@ export default function App() {
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {renderLostFound()}
+          </motion.div>
+        )}
+        {view === 'scheduler' && (
+          <motion.div
+            key="scheduler"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            {renderScheduler()}
           </motion.div>
         )}
         {view === 'messenger' && (
