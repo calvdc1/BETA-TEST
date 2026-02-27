@@ -714,6 +714,7 @@ export default function App() {
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
   const [showCampusModal, setShowCampusModal] = useState(false);
   const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
+  const [showCampusDirectory, setShowCampusDirectory] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -983,6 +984,7 @@ export default function App() {
     if (view === 'explorer' && selectedCampus) {
       setActiveCampusSlug(selectedCampus.slug);
     }
+    if (view === 'explorer') setShowCampusDirectory(true);
   }, [view, selectedCampus]);
 
   useEffect(() => {
@@ -2490,9 +2492,9 @@ export default function App() {
     const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
-      <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
+      <div className="h-[100dvh] w-full bg-[radial-gradient(circle_at_top,#1f1a12,#090909_58%)] flex md:flex-row overflow-hidden">
         {/* Sidebar - Campus List */}
-        <div className="w-full md:w-80 border-r border-white/5 flex flex-col shrink-0 bg-black/40 backdrop-blur-md">
+        <div className={`w-full md:w-80 border-r border-white/5 ${showCampusDirectory ? 'flex' : 'hidden'} md:flex flex-col shrink-0 bg-[#121317]/95 backdrop-blur-md`}>
           <div className="p-6 border-b border-white/5">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold text-white">MSU <span className="text-amber-500">System</span></h2>
@@ -2504,7 +2506,7 @@ export default function App() {
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setActiveCampusSlug(campus.slug)}
+                onClick={() => { setActiveCampusSlug(campus.slug); setShowCampusDirectory(false); }}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2520,7 +2522,10 @@ export default function App() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto scrollbar-hide bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95">
+        <div className={`flex-1 ${showCampusDirectory ? 'hidden md:flex' : 'flex'} flex-col min-w-0 overflow-y-auto scrollbar-hide bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-fixed opacity-95`}>
+          <div className="md:hidden p-3 border-b border-white/10 bg-black/40 sticky top-0 z-20">
+            <button onClick={() => setShowCampusDirectory(true)} className="px-3 py-2 rounded-lg text-xs font-bold bg-amber-500 text-black">All Campuses</button>
+          </div>
           {/* Cover Area */}
           <div className="relative h-64 md:h-80 shrink-0 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0502]" />
@@ -2561,12 +2566,11 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => {
-                    setSelectedCampus(activeCampus);
-                    setShowCampusModal(true);
+                    window.open(activeCampus.website, '_blank', 'noopener,noreferrer');
                   }}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
                 >
-                  View Details
+                  Campus Snapshot
                 </button>
                 <button
                   onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')}
@@ -4015,7 +4019,7 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-[100dvh] bg-[#0a0502] flex flex-col md:flex-row overflow-hidden text-gray-200">
+    <div className="h-[100dvh] bg-[radial-gradient(circle_at_top,#231a0f,#090909_60%)] flex flex-col md:flex-row overflow-hidden text-gray-200">
       {/* Sidebar */}
       <div className={`
         flex flex-col shrink-0 border-r border-white/5 transition-all duration-300
@@ -4453,6 +4457,7 @@ export default function App() {
                                   {mType?.startsWith('video') ? <video src={mUrl} controls className="w-full" /> : <img src={mUrl} alt="" className="w-full object-cover" />}
                                 </div>
                               )}
+                              {renderLinkPreview((m as any).content)}
                             </div>
                             {showTimestamps && isLastInChain && (
                               <span className={`text-[9px] text-gray-500 px-1 ${isMe ? 'text-right' : 'text-left'} w-full flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
