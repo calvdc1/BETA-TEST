@@ -42,7 +42,10 @@ import {
   Mic,
   Video,
   PhoneOff,
-  Monitor
+  Monitor,
+  Download,
+  CalendarDays,
+  StickyNote
 } from 'lucide-react';
 
 // --- Types ---
@@ -314,33 +317,6 @@ const SPARKLES = [
   { top: "82%", left: "60%" },
 ];
 
-const WELCOME_SCENES = [
-  {
-    title: 'Welcome to ONEMSU',
-    text: 'Your digital hub connecting students across the Mindanao State University system.',
-    tips: ['Explore campuses and official links', 'Join communities and groups', 'Use one account for updates and messaging']
-  },
-  {
-    title: 'Campus Explorer Guide',
-    text: 'Use Explorer to compare campuses, verify trusted sources, and open 3D campus map views.',
-    tips: ['Tap any campus in the left panel', 'Open Reliable Sources for official pages', 'Use 3D Campus Map for immersive view']
-  },
-  {
-    title: 'Social + Messenger',
-    text: 'Post on the freedom wall, join groups, and chat in real-time with classmates and organizations.',
-    tips: ['Use Messenger for direct and group channels', 'Join campus-based organizations', 'Share feedback to improve the platform']
-  },
-  {
-    title: 'Stay Safe and Verified',
-    text: 'Always rely on official campus links and verify announcements before sharing.',
-    tips: ['Check source badges before opening links', 'Protect your account credentials', 'Report suspicious posts in-app']
-  },
-  {
-    title: "Let's Get Started",
-    text: 'Navigate to Explorer, Dashboard, and Messenger anytime from the top menu.',
-    tips: ['Complete your profile', 'Follow your campus updates', 'Invite classmates to ONEMSU']
-  }
-] as const;
 
 // --- Components ---
 
@@ -652,8 +628,6 @@ export default function App() {
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [welcomeSecond, setWelcomeSecond] = useState(60);
 
   useEffect(() => {
     setShowWelcome(false);
@@ -700,6 +674,7 @@ export default function App() {
   const [freedomPosts, setFreedomPosts] = useState<{ id: number; user_id: number | null; alias: string; content: string; campus: string; image_url?: string; likes: number; reports: number; timestamp: string }[]>([]);
   const [freedomText, setFreedomText] = useState('');
   const [freedomImagePreview, setFreedomImagePreview] = useState<string | null>(null);
+  const [confessionAlias, setConfessionAlias] = useState('ONEMSU');
   const isOwner = (email?: string) => email === 'xandercamarin@gmail.com' || email === 'sophiakayeaninao@gmail.com';
   const isVerified = (email?: string) => isOwner(email) || email === 'krisandrea.gonzaga@g.msuiit.edu.ph' || email === 'marcoalfons.bollozos@g.msuiit.edu.ph';
   const [selectedGroup, setSelectedGroup] = useState<{ id: number; name: string; description: string; campus: string; logo_url?: string } | null>(null);
@@ -798,6 +773,17 @@ export default function App() {
     } catch { return []; }
   });
 
+
+  const [schedulerItems, setSchedulerItems] = useState<{ id: string; title: string; date: string; note: string }[]>(() => {
+    try {
+      const key = typeof window !== 'undefined'
+        ? (user ? `onemsu_sched_${user.id}` : 'onemsu_sched_guest')
+        : 'onemsu_sched_guest';
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
   const safeJson = async (r: Response) => {
     try {
       const t = await r.text();
@@ -834,6 +820,11 @@ export default function App() {
       localStorage.setItem(`onemsu_dms_${user.id}`, JSON.stringify(directMessageList));
     }
   }, [directMessageList, user]);
+
+  useEffect(() => {
+    const key = user ? `onemsu_sched_${user.id}` : 'onemsu_sched_guest';
+    localStorage.setItem(key, JSON.stringify(schedulerItems));
+  }, [schedulerItems, user]);
 
   const addToDMList = (otherUser: { id: number; name: string; avatar?: string; campus?: string }) => {
     setDirectMessageList(prev => {
@@ -1191,7 +1182,8 @@ export default function App() {
       setTypingUsers(prev => ({ ...prev, [activeRoom]: ['JARVIS'] }));
       
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "AIzaSyAF2nzTlCtgouiM6n0StTEiWl9nzfCkZMc" });
+        const envKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY as string | undefined;
+        const ai = envKey ? new GoogleGenAI({ apiKey: envKey }) : null;
         
         // Build conversation history for context
         const history = messages
@@ -1225,7 +1217,7 @@ export default function App() {
           Campus: ${user.campus || 'Global'}
         `;
 
-        const response = await ai.models.generateContent({
+        const response = ai ? await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: [
             ...history,
@@ -1236,9 +1228,15 @@ export default function App() {
             temperature: 0.7,
             thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
           }
-        });
-        
-        const aiResponse = response.text || "I'm having trouble processing that request right now, Sir.";
+        }) : null;
+
+        const quickFallback = text.toLowerCase().includes('hello')
+          ? `Hello ${user.name}, JARVIS online. Ask me about schedules, studies, or campus updates.`
+          : text.toLowerCase().includes('schedule')
+            ? 'You can use the Scheduler card in Dashboard Quick Actions to plan classes and reminders.'
+            : 'JARVIS text fallback mode is active. Add VITE_GEMINI_API_KEY to enable full AI responses.';
+
+        const aiResponse = response?.text || quickFallback;
         
         setTypingUsers(prev => ({ ...prev, [activeRoom]: [] }));
         
@@ -1771,7 +1769,9 @@ export default function App() {
                   { name: 'Updates', icon: <MessageSquare size={14} />, action: () => setView('newsfeed'), unread: updatesUnread },
                   { name: 'Confession', icon: <Sparkles size={14} />, action: () => setView('confession') },
                   { name: 'Explorer', icon: <Globe size={14} />, action: () => setView('explorer') },
-                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') }
+                  { name: 'Feedbacks', icon: <Info size={14} />, action: () => setView('feedbacks') },
+                  { name: 'Notes', icon: <StickyNote size={14} />, action: () => document.getElementById('notes-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+                  { name: 'Scheduler', icon: <CalendarDays size={14} />, action: () => document.getElementById('scheduler-board')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }
                 ].map(item => (
                   <button 
                     key={item.name} 
@@ -1800,7 +1800,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
+            <div id="notes-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-bold flex items-center gap-2"><BookOpen size={18} className="text-amber-500" /> Notes</h4>
                 <button
@@ -1853,6 +1853,45 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div id="scheduler-board" className="p-6 rounded-3xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold flex items-center gap-2"><CalendarDays size={18} className="text-amber-500" /> Scheduler</h4>
+                <button
+                  onClick={() => setSchedulerItems(prev => [{ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: 'New Schedule', date: new Date().toISOString().slice(0, 10), note: '' }, ...prev])}
+                  className="p-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20"
+                  title="Add schedule"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-hide">
+                {schedulerItems.length === 0 && <p className="text-sm text-gray-500">No schedules yet. Add one from Quick Actions.</p>}
+                {schedulerItems.map(item => (
+                  <div key={item.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
+                    <input
+                      value={item.title}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, title: e.target.value } : x))}
+                      className="w-full mb-2 bg-transparent text-sm font-semibold text-white outline-none"
+                      placeholder="Schedule title"
+                    />
+                    <input
+                      type="date"
+                      value={item.date}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, date: e.target.value } : x))}
+                      className="w-full mb-2 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-200"
+                    />
+                    <textarea
+                      rows={2}
+                      value={item.note}
+                      onChange={(e) => setSchedulerItems(prev => prev.map(x => x.id === item.id ? { ...x, note: e.target.value } : x))}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-300"
+                      placeholder="Notes"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -3418,6 +3457,7 @@ export default function App() {
         {/* ID Card Design */}
         <div className="relative group">
           <motion.div 
+            ref={idCardRef}
             initial={{ rotateY: -10, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
             ref={idCardRef}
@@ -3563,7 +3603,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-12 p-8 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl"
           >
-            <ProfileForm user={user} onSaved={(u) => { setUser(u); setProfileEditing(false); }} />
+            <ProfileForm user={user} onSaved={(u) => { setUser(u); setProfileData(u); setProfileEditing(false); }} />
           </motion.div>
         )}
       </div>
@@ -3834,6 +3874,13 @@ export default function App() {
             </div>
           </div>
 
+          <input
+            value={confessionAlias}
+            onChange={(e) => setConfessionAlias(e.target.value.slice(0, 40))}
+            placeholder="Nickname"
+            className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all mb-4"
+          />
+
           <textarea
             value={freedomText}
             onChange={(e) => setFreedomText(e.target.value)}
@@ -3885,7 +3932,7 @@ export default function App() {
                 const res = await fetch('/api/freedomwall', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId: user.id, content: freedomText.trim(), campus: user.campus || 'Global', imageUrl })
+                  body: JSON.stringify({ userId: user.id, alias: confessionAlias || 'ONEMSU', content: freedomText.trim(), campus: user.campus || 'Global', imageUrl })
                 }).then(r => r.json());
                 if (res.success) {
                   setFreedomText('');
@@ -4730,55 +4777,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showWelcome && !showSplash && (
-          <motion.div
-            key="welcome-presentation"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ y: 20, scale: 0.98 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: 12, scale: 0.98 }}
-              className="w-full max-w-3xl card-gold rounded-3xl p-6 md:p-10"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl md:text-3xl font-black text-metallic-gold">{WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].title}</h2>
-                <button onClick={() => setShowWelcome(false)} className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-bold hover:bg-white/20">Skip</button>
-              </div>
-
-              <p className="text-gray-300 mb-5 leading-relaxed">
-                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].text}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].tips.map((tip) => (
-                  <div key={tip} className="p-3 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-200">
-                    {tip}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                  <span>Welcome presentation (60s)</span>
-                  <span>{welcomeSecond}s left</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 transition-all duration-500" style={{ width: `${((60 - welcomeSecond) / 60) * 100}%` }} />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button onClick={() => setShowWelcome(false)} className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold hover:bg-white/20">Start Exploring</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {view === 'home' && (

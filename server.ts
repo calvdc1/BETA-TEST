@@ -318,7 +318,7 @@ async function startServer() {
     res.json(rows);
   });
   app.post("/api/freedomwall", (req, res) => {
-    const { userId, content, campus, imageUrl } = req.body;
+    const { userId, content, campus, imageUrl, alias } = req.body;
     if (!content || !campus) return res.status(400).json({ success: false, message: "Missing content or campus" });
     const alias = "ONEMSU";
     const info = db.prepare("INSERT INTO freedom_posts (user_id, alias, content, campus, image_url) VALUES (?, ?, ?, ?, ?)").run(userId || null, alias, content, campus, imageUrl || null);
