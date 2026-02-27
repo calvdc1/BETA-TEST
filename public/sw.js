@@ -1,5 +1,7 @@
-const CACHE_NAME = 'onemsu-static-v2';
+const CACHE_NAME = 'onemsu-static-v3';
 const STATIC_ASSETS = [
+  '/',
+  '/index.html',
   '/manifest.json'
 ];
 
