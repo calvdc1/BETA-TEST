@@ -466,7 +466,7 @@ const BrandLogoChoice = ({ variant, className = "w-20 h-20" }: { variant: number
   </svg>
 );
 
-const SplashScreen = () => {
+const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
   const [statusIndex, setStatusIndex] = useState(0);
   
@@ -479,24 +479,30 @@ const SplashScreen = () => {
   ];
 
   useEffect(() => {
-    const duration = 10000; // 10 seconds
+    const duration = 7000;
     const interval = 50;
     const steps = duration / interval;
     const increment = 100 / steps;
-    
+
     const timer = setInterval(() => {
       setProgress(prev => Math.min(prev + increment, 100));
     }, interval);
 
     const statusTimer = setInterval(() => {
       setStatusIndex(prev => (prev + 1) % statuses.length);
-    }, 2000);
-    
+    }, 1400);
+
     return () => {
       clearInterval(timer);
       clearInterval(statusTimer);
     };
   }, []);
+
+  useEffect(() => {
+    if (progress < 100) return;
+    const doneTimer = setTimeout(() => onComplete(), 1200);
+    return () => clearTimeout(doneTimer);
+  }, [progress, onComplete]);
 
   return (
     <div className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center overflow-hidden">
@@ -573,6 +579,18 @@ const SplashScreen = () => {
             />
           </div>
         </div>
+        <AnimatePresence>
+          {progress >= 100 && (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mt-6 text-base md:text-lg font-semibold text-amber-200 tracking-wide"
+            >
+              Welcome to ONEMSU
+            </motion.p>
+          )}
+        </AnimatePresence>
       </motion.div>
       
       {/* Data Stream Particles */}
@@ -671,15 +689,6 @@ export default function App() {
   });
   const viewRef = useRef(view);
 
-  useEffect(() => {
-    if (!showSplash) return;
-
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3500);
-
-    return () => clearTimeout(timer);
-  }, [showSplash]);
 
   useEffect(() => {
     viewRef.current = view;
@@ -4646,7 +4655,7 @@ export default function App() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="fixed inset-0 z-[9999]"
           >
-            <SplashScreen />
+            <SplashScreen onComplete={() => setShowSplash(false)} />
           </motion.div>
         )}
       </AnimatePresence>
