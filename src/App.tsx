@@ -669,6 +669,7 @@ export default function App() {
     }
     return 'home';
   });
+  const viewRef = useRef(view);
 
   useEffect(() => {
     if (!showSplash) return;
@@ -681,6 +682,7 @@ export default function App() {
   }, [showSplash]);
 
   useEffect(() => {
+    viewRef.current = view;
     localStorage.setItem('onemsu_view', view);
     if (typeof window !== 'undefined' && window.location.hash !== `#${view}`) {
       window.history.replaceState(null, '', `#${view}`);
@@ -1744,29 +1746,53 @@ export default function App() {
       .reduce((sum, [_, count]) => (sum as number) + (count as number), 0);
 
     return (
-    <div className="h-full w-full bg-[#0a0502] p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
+    <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(61,43,22,0.9),#090704_55%)] p-4 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide">
       <div className="max-w-7xl mx-auto pb-20">
-        <header className="flex justify-between items-center mb-12">
+        <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8 rounded-3xl border border-amber-400/20 bg-black/30 backdrop-blur-sm p-6">
           <div className="flex items-center gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'MSUan'}!</h2>
-              <p className="text-gray-500 text-sm">Connected to {user?.email || 'Unified System'}</p>
+              <p className="text-gray-300/80 text-sm">Connected to {user?.email || 'Unified System'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={handleLogout}
-              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors text-sm font-medium"
+              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white transition-colors text-sm font-medium"
             >
               Sign Out
             </button>
           </div>
         </header>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-amber-200/80">Unread Chats</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{messengerUnread}</p>
+              <MessageCircle className="text-amber-300" size={18} />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80">Campus Updates</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{updatesUnread}</p>
+              <Bell className="text-sky-300" size={18} />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-transparent p-4">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-200/80">Community Groups</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-white">{groups.length}</p>
+              <Users className="text-emerald-300" size={18} />
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar (Special Features) */}
           <div className="lg:col-span-1 space-y-8 order-2 lg:order-1">
-            <div className="card-gold p-6 rounded-3xl relative overflow-hidden group cursor-pointer" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
+            <div className="p-6 rounded-3xl relative overflow-hidden group cursor-pointer border border-indigo-400/30 bg-gradient-to-br from-slate-900 to-indigo-950/70" onClick={() => { setActiveRoom('dm-ai-assistant'); setView('messenger'); }}>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -1790,7 +1816,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card-gold p-6 rounded-3xl">
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
               <h3 className="font-bold mb-4 flex items-center gap-2"><Globe size={18} className="text-amber-500" /> Campus Information</h3>
               <div className="space-y-3">
                 {CAMPUSES.map((c) => (
@@ -1822,7 +1848,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="card-gold p-6 rounded-3xl">
+            <div className="p-6 rounded-3xl border border-white/10 bg-black/35 backdrop-blur-sm">
               <h3 className="font-bold mb-4">Navigation & Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
@@ -1875,13 +1901,13 @@ export default function App() {
 
           {/* Main Feed */}
           <div className="lg:col-span-3 space-y-8 order-1 lg:order-2">
-            <div className="card-gold p-8 rounded-3xl">
+            <div className="p-8 rounded-3xl border border-amber-400/30 bg-gradient-to-r from-[#16110a] to-[#1d202f] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Sparkles className="text-amber-500" size={20} /> Confession Wall
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {freedomPosts.slice(0, 5).map((p) => (
-                  <div key={p.id} className={`rounded-2xl overflow-hidden bg-white/5 border border-white/10 ${freedomPosts.indexOf(p) === 0 ? 'md:col-span-2' : ''}`}>
+                  <div key={p.id} className={`rounded-2xl overflow-hidden bg-black/40 border border-white/10 ${freedomPosts.indexOf(p) === 0 ? 'md:col-span-2' : ''}`}>
                     {p.image_url && <img src={p.image_url} alt="" className={`${freedomPosts.indexOf(p) === 0 ? 'h-48' : 'h-32'} w-full object-cover`} />}
                     <div className="p-4">
                       <div className="flex justify-between items-center">
@@ -1904,7 +1930,7 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
+              <div className="p-6 rounded-3xl bg-black/30 border border-white/10 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-bold flex items-center gap-2"><Users size={18} className="text-amber-500" /> Community Groups</h4>
                   <button
