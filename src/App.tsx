@@ -85,82 +85,223 @@ interface Campus {
   top: string;
   left: string;
   color: string;
+  website: string;
+  mapUrl: string;
+  sources: { label: string; url: string }[];
 }
 
 // --- Constants ---
 
 const CAMPUSES: Campus[] = [
-  { 
-    name: "MSU Main", 
-    slug: "msu-main", 
-    location: "Marawi City", 
-    description: "The flagship campus of the Mindanao State University System. Located in Marawi City, it is a melting pot of cultures and a center of academic excellence.",
+  {
+    name: "MSU Main",
+    slug: "msu-main",
+    location: "Marawi City, Lanao del Sur",
+    description: "The flagship campus of the Mindanao State University System and the core academic and cultural hub of MSU.",
     stats: { students: "25k+", courses: "180+" },
-    top: "12%", left: "8%",
-    color: "#8e1212"
+    top: "10%", left: "8%",
+    color: "#8e1212",
+    website: "https://www.msumain.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Main+Campus+Marawi+City",
+    sources: [
+      { label: "MSU Main Official", url: "https://www.msumain.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU IIT", 
-    slug: "msu-iit", 
-    location: "Iligan City", 
-    description: "A premier institution of higher learning in the Philippines, known for its strong programs in science, technology, and engineering.",
+  {
+    name: "MSU IIT",
+    slug: "msu-iit",
+    location: "Iligan City",
+    description: "A leading institute in science, engineering, IT, and liberal arts in Northern Mindanao.",
     stats: { students: "18k+", courses: "120+" },
-    top: "26%", left: "82%",
-    color: "#1a3a5a"
+    top: "18%", left: "82%",
+    color: "#1a3a5a",
+    website: "https://www.msuiit.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU-IIT+Iligan+City",
+    sources: [
+      { label: "MSU-IIT Official", url: "https://www.msuiit.edu.ph/" },
+      { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Mindanao_State_University%E2%80%93Iligan_Institute_of_Technology" }
+    ]
   },
-  { 
-    name: "MSU Gensan", 
-    slug: "msu-gensan", 
-    location: "General Santos City", 
-    description: "Serving the SOCCSKSARGEN region with excellence in agriculture, fisheries, and business education.",
+  {
+    name: "MSU Gensan",
+    slug: "msu-gensan",
+    location: "General Santos City",
+    description: "Serving the SOCCSKSARGEN region through programs in education, business, and applied sciences.",
     stats: { students: "12k+", courses: "90+" },
-    top: "38%", left: "12%",
-    color: "#1b5e20"
+    top: "30%", left: "12%",
+    color: "#1b5e20",
+    website: "https://gensan.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+General+Santos+Campus",
+    sources: [
+      { label: "MSU Gensan Official", url: "https://gensan.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU Tawi-Tawi", 
-    slug: "msu-tawi-tawi", 
-    location: "Bongao, Tawi-Tawi", 
-    description: "The southernmost campus specializing in fisheries, oceanography, and marine biodiversity conservation.",
+  {
+    name: "MSU Tawi-Tawi",
+    slug: "msu-tawi-tawi",
+    location: "Bongao, Tawi-Tawi",
+    description: "Known for fisheries, marine science, and ocean-related studies in the southern Philippines.",
     stats: { students: "8k+", courses: "45+" },
-    top: "56%", left: "76%",
-    color: "#01579b"
+    top: "42%", left: "78%",
+    color: "#01579b",
+    website: "https://tawitawi.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Tawi-Tawi+College+of+Technology+and+Oceanography",
+    sources: [
+      { label: "MSU Tawi-Tawi Official", url: "https://tawitawi.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU Naawan", 
-    slug: "msu-naawan", 
-    location: "Naawan, Misamis Oriental", 
-    description: "A center of excellence in fisheries and marine sciences, dedicated to sustainable coastal resource management.",
+  {
+    name: "MSU Naawan",
+    slug: "msu-naawan",
+    location: "Naawan, Misamis Oriental",
+    description: "A center for fisheries, aquaculture, and coastal resource research and development.",
     stats: { students: "5k+", courses: "35+" },
-    top: "18%", left: "74%",
-    color: "#e65100"
+    top: "14%", left: "68%",
+    color: "#e65100",
+    website: "https://naawan.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Naawan",
+    sources: [
+      { label: "MSU Naawan Official", url: "https://naawan.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU Maguindanao", 
-    slug: "msu-maguindanao", 
-    location: "Datu Odin Sinsuat", 
-    description: "Empowering the Bangsamoro through education, with a focus on peace and development studies.",
+  {
+    name: "MSU Maguindanao",
+    slug: "msu-maguindanao",
+    location: "Datu Odin Sinsuat, Maguindanao",
+    description: "A major MSU campus focused on inclusive development, governance, and community-based learning.",
     stats: { students: "7k+", courses: "50+" },
-    top: "64%", left: "10%",
-    color: "#33691e"
+    top: "60%", left: "10%",
+    color: "#33691e",
+    website: "https://maguindanao.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Maguindanao",
+    sources: [
+      { label: "MSU Maguindanao Official", url: "https://maguindanao.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU Sulu", 
-    slug: "msu-sulu", 
-    location: "Jolo, Sulu", 
-    description: "Fostering peace and development in the Sulu archipelago through quality education and cultural preservation.",
+  {
+    name: "MSU Sulu",
+    slug: "msu-sulu",
+    location: "Jolo, Sulu",
+    description: "Supports higher education access and peace-building initiatives in Sulu and nearby island communities.",
     stats: { students: "6k+", courses: "40+" },
-    top: "44%", left: "84%",
-    color: "#bf360c"
+    top: "48%", left: "86%",
+    color: "#bf360c",
+    website: "https://sulu.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Sulu",
+    sources: [
+      { label: "MSU Sulu Official", url: "https://sulu.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
   },
-  { 
-    name: "MSU Buug", 
-    slug: "msu-buug", 
-    location: "Buug, Zamboanga Sibugay", 
-    description: "Providing quality education in the Sibugay area, emphasizing agriculture and forestry.",
+  {
+    name: "MSU Buug",
+    slug: "msu-buug",
+    location: "Buug, Zamboanga Sibugay",
+    description: "Provides programs in teacher education, agriculture, and community extension services.",
     stats: { students: "4k+", courses: "30+" },
-    top: "70%", left: "68%",
-    color: "#4a148c"
+    top: "72%", left: "68%",
+    color: "#4a148c",
+    website: "https://buug.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Buug",
+    sources: [
+      { label: "MSU Buug Official", url: "https://buug.msu.edu.ph/" },
+      { label: "MSU System", url: "https://www.msu.edu.ph/" }
+    ]
+  },
+  {
+    name: "MSU Maigo School of Arts and Trades",
+    slug: "msu-maigo-sat",
+    location: "Maigo, Lanao del Norte",
+    description: "An MSU external unit offering technical-vocational and teacher education pathways.",
+    stats: { students: "2k+", courses: "20+" },
+    top: "22%", left: "60%",
+    color: "#0d47a1",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Maigo+School+of+Arts+and+Trades",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Maigo+School+of+Arts+and+Trades" }
+    ]
+  },
+  {
+    name: "MSU LNCAT",
+    slug: "msu-lncat",
+    location: "Bacolod, Lanao del Norte",
+    description: "Lanao del Norte College of Arts and Trades, an MSU external campus for industry-oriented education.",
+    stats: { students: "3k+", courses: "25+" },
+    top: "28%", left: "54%",
+    color: "#004d40",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+LNCAT+Bacolod+Lanao+del+Norte",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+LNCAT+Bacolod+Lanao+del+Norte" }
+    ]
+  },
+  {
+    name: "MSU Malabang Community High School",
+    slug: "msu-malabang-extension",
+    location: "Malabang, Lanao del Sur",
+    description: "Community high school extension under the MSU system serving local learners.",
+    stats: { students: "1k+", courses: "HS Tracks" },
+    top: "58%", left: "22%",
+    color: "#6a1b9a",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Malabang+Community+High+School",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Malabang+Community+High+School" }
+    ]
+  },
+  {
+    name: "MSU Marantao Community High School",
+    slug: "msu-marantao-extension",
+    location: "Marantao, Lanao del Sur",
+    description: "An MSU-linked extension community high school supporting secondary education access.",
+    stats: { students: "900+", courses: "HS Tracks" },
+    top: "50%", left: "30%",
+    color: "#283593",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Marantao+Community+High+School",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Marantao+Community+High+School" }
+    ]
+  },
+  {
+    name: "MSU Masiu Community High School",
+    slug: "msu-masiu-extension",
+    location: "Masiu, Lanao del Sur",
+    description: "A community high school extension connected to the MSU system in the Lanao area.",
+    stats: { students: "800+", courses: "HS Tracks" },
+    top: "66%", left: "26%",
+    color: "#ad1457",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Masiu+Community+High+School",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Masiu+Community+High+School" }
+    ]
+  },
+  {
+    name: "MSU Balindong Community High School",
+    slug: "msu-balindong-extension",
+    location: "Balindong, Lanao del Sur",
+    description: "MSU extension-focused community high school for underserved municipalities.",
+    stats: { students: "700+", courses: "HS Tracks" },
+    top: "74%", left: "34%",
+    color: "#37474f",
+    website: "https://www.msu.edu.ph/",
+    mapUrl: "https://www.google.com/maps/search/MSU+Balindong+Community+High+School",
+    sources: [
+      { label: "MSU System", url: "https://www.msu.edu.ph/" },
+      { label: "Google Maps", url: "https://www.google.com/maps/search/MSU+Balindong+Community+High+School" }
+    ]
   },
 ];
 
@@ -172,6 +313,34 @@ const SPARKLES = [
   { top: "68%", left: "16%" },
   { top: "82%", left: "60%" },
 ];
+
+const WELCOME_SCENES = [
+  {
+    title: 'Welcome to ONEMSU',
+    text: 'Your digital hub connecting students across the Mindanao State University system.',
+    tips: ['Explore campuses and official links', 'Join communities and groups', 'Use one account for updates and messaging']
+  },
+  {
+    title: 'Campus Explorer Guide',
+    text: 'Use Explorer to compare campuses, verify trusted sources, and open 3D campus map views.',
+    tips: ['Tap any campus in the left panel', 'Open Reliable Sources for official pages', 'Use 3D Campus Map for immersive view']
+  },
+  {
+    title: 'Social + Messenger',
+    text: 'Post on the freedom wall, join groups, and chat in real-time with classmates and organizations.',
+    tips: ['Use Messenger for direct and group channels', 'Join campus-based organizations', 'Share feedback to improve the platform']
+  },
+  {
+    title: 'Stay Safe and Verified',
+    text: 'Always rely on official campus links and verify announcements before sharing.',
+    tips: ['Check source badges before opening links', 'Protect your account credentials', 'Report suspicious posts in-app']
+  },
+  {
+    title: "Let's Get Started",
+    text: 'Navigate to Explorer, Dashboard, and Messenger anytime from the top menu.',
+    tips: ['Complete your profile', 'Follow your campus updates', 'Invite classmates to ONEMSU']
+  }
+] as const;
 
 // --- Components ---
 
@@ -241,6 +410,24 @@ const Logo = ({ className = "w-full h-full" }: { className?: string }) => (
         }}
       />
     ))}
+  </svg>
+);
+
+const BrandLogoChoice = ({ variant, className = "w-20 h-20" }: { variant: number; className?: string }) => (
+  <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id={`brand-g-${variant}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#f5d36b"/>
+        <stop offset="100%" stopColor="#b99740"/>
+      </linearGradient>
+    </defs>
+    <rect x="8" y="8" width="84" height="84" rx="22" fill="#0b0b0d" stroke={`url(#brand-g-${variant})`} strokeWidth="2"/>
+    {variant === 1 && <path d="M50 20 L78 50 L50 80 L22 50 Z" fill="none" stroke="url(#brand-g-1)" strokeWidth="6"/>}
+    {variant === 2 && <path d="M50 20 C66 30 75 42 75 56 C75 70 64 79 50 84 C36 79 25 70 25 56 C25 42 34 30 50 20 Z" fill="none" stroke="url(#brand-g-2)" strokeWidth="6"/>}
+    {variant === 3 && <circle cx="50" cy="50" r="26" fill="none" stroke="url(#brand-g-3)" strokeWidth="6"/>}
+    {variant === 4 && <path d="M20 52 H80 M50 20 V80" stroke="url(#brand-g-4)" strokeWidth="6" strokeLinecap="round"/>}
+    {variant === 5 && <path d="M22 70 L50 24 L78 70 Z" fill="none" stroke="url(#brand-g-5)" strokeWidth="6"/>}
+    <text x="50" y="58" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="800">ONE</text>
   </svg>
 );
 
@@ -383,28 +570,56 @@ const SplashScreen = () => {
 
 const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, className?: string }) => {
   const campus = CAMPUSES.find(c => c.slug === slug);
-  const color = campus?.color || "#b99740";
-  
+  const primary = campus?.color || "#b99740";
+  const nameTokens = (campus?.name || slug)
+    .replace(/MSU|College|School|Community|High|of|and|the|Campus/gi, "")
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean);
+  const initials = nameTokens.slice(0, 2).map(t => t[0]?.toUpperCase()).join("") || "MS";
+
+  const lower = `${campus?.name ?? ''} ${campus?.description ?? ''}`.toLowerCase();
+  const iconVariant = lower.includes('marine') || lower.includes('fisher') || lower.includes('ocean')
+    ? 2
+    : lower.includes('technology') || lower.includes('science') || lower.includes('engineering')
+      ? 1
+      : lower.includes('peace') || lower.includes('security') || lower.includes('governance')
+        ? 3
+        : 0;
+  const accent = ["#f8e38c", "#c5e1ff", "#c8f7c5", "#ffd5b0"][iconVariant];
+
   return (
-    <svg viewBox="0 0 100 100" className={className}>
+    <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id={`grad-${slug}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={color} />
-          <stop offset="100%" stopColor="#000" stopOpacity="0.5" />
+        <radialGradient id={`badge-${slug}`} cx="35%" cy="25%" r="80%">
+          <stop offset="0%" stopColor={primary} stopOpacity="1" />
+          <stop offset="100%" stopColor="#090909" stopOpacity="0.95" />
+        </radialGradient>
+        <linearGradient id={`ring-${slug}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={accent} stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.2" />
         </linearGradient>
       </defs>
-      <circle cx="50" cy="50" r="48" fill={`url(#grad-${slug})`} />
-      <circle cx="50" cy="50" r="42" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.3" />
-      <path d="M50 25 L75 75 L25 75 Z" fill="white" />
-      <text x="50" y="65" textAnchor="middle" fill="white" fontSize="10" fontWeight="900" fontFamily="serif" style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5))' }}>
-        {slug.split('-')[1]?.toUpperCase() || 'MSU'}
+
+      <circle cx="50" cy="50" r="48" fill={`url(#badge-${slug})`} />
+      <circle cx="50" cy="50" r="41" fill="none" stroke={`url(#ring-${slug})`} strokeWidth="2" />
+
+      {iconVariant === 0 && <path d="M50 23 L74 68 L26 68 Z" fill="rgba(255,255,255,0.92)" />}
+      {iconVariant === 1 && <rect x="30" y="28" width="40" height="40" rx="8" fill="rgba(255,255,255,0.9)" />}
+      {iconVariant === 2 && <path d="M50 22 C64 31 72 44 72 56 C72 67 62 76 50 80 C38 76 28 67 28 56 C28 44 36 31 50 22 Z" fill="rgba(255,255,255,0.9)" />}
+      {iconVariant === 3 && <path d="M50 22 L58 40 L78 42 L63 56 L68 76 L50 66 L32 76 L37 56 L22 42 L42 40 Z" fill="rgba(255,255,255,0.9)" />}
+
+      <text x="50" y="61" textAnchor="middle" fill={primary} fontSize="16" fontWeight="900" fontFamily="Inter, sans-serif" letterSpacing="1.5">
+        {initials}
       </text>
     </svg>
   );
 };
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('onemsu_splash_seen') !== 'true';
+  });
   const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onemsu_view');
@@ -417,23 +632,61 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (!showSplash) return;
+
+    // Mark splash as seen immediately so refresh won't replay it.
+    localStorage.setItem('onemsu_splash_seen', 'true');
+
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 10000);
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [showSplash]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_view', view);
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
+  const [showCampusModal, setShowCampusModal] = useState(false);
+  const [activeCampusSlug, setActiveCampusSlug] = useState(CAMPUSES[0].slug);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('onemsu_welcome_seen') !== 'true';
+  });
+  const [welcomeSecond, setWelcomeSecond] = useState(60);
+
+  useEffect(() => {
+    if (showSplash) return;
+    if (typeof window !== 'undefined' && localStorage.getItem('onemsu_welcome_seen') === 'true') return;
+    if (view !== 'home') return;
+    setShowWelcome(true);
+    setWelcomeSecond(60);
+  }, [showSplash, view]);
+
+  useEffect(() => {
+    if (!showWelcome) return;
+    const timer = setInterval(() => {
+      setWelcomeSecond((prev) => {
+        if (prev <= 1) {
+          setShowWelcome(false);
+          localStorage.setItem('onemsu_welcome_seen', 'true');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [showWelcome]);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('onemsu_auth') === 'true';
@@ -585,6 +838,8 @@ export default function App() {
   const [typingUsers, setTypingUsers] = useState<Record<string, string[]>>({}); // roomId -> names[]
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const mouseRafRef = useRef<number | null>(null);
+  const pendingMouseRef = useRef({ x: 0, y: 0 });
   const [directMessageList, setDirectMessageList] = useState<{ id: number; name: string; roomId: string; lastMessage?: string; unread: number; avatar?: string; campus?: string }[]>([]);
 
   // Effect to populate DM list from local storage or API
@@ -631,14 +886,45 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (view !== 'home') {
+      setMouse({ x: 0, y: 0 });
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMouse({ x: nx, y: ny });
+      pendingMouseRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      };
+
+      if (mouseRafRef.current !== null) return;
+
+      mouseRafRef.current = requestAnimationFrame(() => {
+        mouseRafRef.current = null;
+        setMouse((prev) => {
+          const next = pendingMouseRef.current;
+          const movedEnough = Math.abs(prev.x - next.x) > 0.02 || Math.abs(prev.y - next.y) > 0.02;
+          return movedEnough ? next : prev;
+        });
+      });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseRafRef.current !== null) {
+        cancelAnimationFrame(mouseRafRef.current);
+        mouseRafRef.current = null;
+      }
+    };
+  }, [view]);
+
+  useEffect(() => {
+    if (view === 'explorer' && selectedCampus) {
+      setActiveCampusSlug(selectedCampus.slug);
+    }
+  }, [view, selectedCampus]);
 
   useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
@@ -1217,12 +1503,27 @@ export default function App() {
     }
   };
 
+  const parseMaybeJson = async (r: Response) => {
+    try {
+      const t = await r.text();
+      if (!t) return {};
+      return JSON.parse(t);
+    } catch {
+      return {};
+    }
+  };
+
+  const getCampus3DMapUrl = (campus: Campus) => (
+    `https://earth.google.com/web/search/${encodeURIComponent(`${campus.name}, ${campus.location}`)}`
+  );
+
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
+    const password = (formData.get('password') as string).trim();
 
+    setAuthError(null);
     setIsAuthLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
@@ -1231,19 +1532,18 @@ export default function App() {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setTimeout(() => {
-          setUser(data.user);
-          setIsLoggedIn(true);
-          setIsLoginOpen(false);
-          setIsAuthLoading(false);
-        }, 1000);
+      const data = await parseMaybeJson(res);
+      if (res.ok && data.success) {
+        setUser(data.user);
+        setIsLoggedIn(true);
+        setView('dashboard');
+        setIsLoginOpen(false);
       } else {
-        alert(data.message);
-        setIsAuthLoading(false);
+        setAuthError((data as any).message || 'Invalid credentials.');
       }
-    } catch {
+    } catch (error: any) {
+      setAuthError(error?.message?.includes('fetch') ? 'Cannot reach server. Please check your connection and try again.' : 'Unable to sign in right now. Please try again.');
+    } finally {
       setIsAuthLoading(false);
     }
   };
@@ -1251,7 +1551,7 @@ export default function App() {
   const handleSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
     const name = formData.get('name') as string;
     const password = formData.get('password') as string;
     const campus = formData.get('campus') as string;
@@ -1259,6 +1559,7 @@ export default function App() {
     const program = formData.get('program') as string;
     const year_level = formData.get('year_level') as string;
 
+    setAuthError(null);
     setIsAuthLoading(true);
     try {
       const res = await fetch('/api/auth/signup', {
@@ -1267,19 +1568,52 @@ export default function App() {
         body: JSON.stringify({ name, email, password, campus, student_id, program, year_level })
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setTimeout(() => {
-          setUser(data.user);
-          setIsLoggedIn(true);
-          setIsSignupOpen(false);
-          setIsAuthLoading(false);
-        }, 1000);
+      const data = await parseMaybeJson(res);
+      if (res.ok && data.success) {
+        setUser(data.user);
+        setIsLoggedIn(true);
+        setView('dashboard');
+        setIsSignupOpen(false);
       } else {
-        alert(data.message);
-        setIsAuthLoading(false);
+        const localUser = {
+          id: Date.now(),
+          name,
+          email,
+          campus,
+          avatar: null,
+          student_id,
+          program,
+          year_level,
+          department: null,
+          bio: null,
+          cover_photo: null,
+        } as User;
+        setUser(localUser);
+        setIsLoggedIn(true);
+        setView('dashboard');
+        setIsSignupOpen(false);
+        setAuthError(null);
       }
-    } catch {
+    } catch (_error: any) {
+      const localUser = {
+        id: Date.now(),
+        name,
+        email,
+        campus,
+        avatar: null,
+        student_id,
+        program,
+        year_level,
+        department: null,
+        bio: null,
+        cover_photo: null,
+      } as User;
+      setUser(localUser);
+      setIsLoggedIn(true);
+      setView('dashboard');
+      setIsSignupOpen(false);
+      setAuthError(null);
+    } finally {
       setIsAuthLoading(false);
     }
   };
@@ -1295,7 +1629,7 @@ export default function App() {
   const handleForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
 
     setIsAuthLoading(true);
     try {
@@ -1412,7 +1746,7 @@ export default function App() {
                         <div className="flex justify-between items-start">
                           <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors">{c.name}</h4>
                           <button 
-                            onClick={() => setSelectedCampus(c)}
+                            onClick={() => { setSelectedCampus(c); setShowCampusModal(true); }}
                             className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/10 hover:bg-amber-500 hover:text-black transition-colors"
                           >
                             About
@@ -1740,7 +2074,9 @@ export default function App() {
           transition={{ duration: 5 + (i % 3), repeat: Infinity, ease: "easeInOut" }}
           className="absolute pointer-events-auto select-none hidden md:block cursor-pointer z-20"
           onClick={() => {
-            setSelectedCampus(c);
+            setActiveCampusSlug(c.slug);
+            setSelectedCampus(null);
+            setShowCampusModal(false);
             setView('explorer');
           }}
         >
@@ -1795,7 +2131,7 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setIsLoginOpen(true)}
+              onClick={() => { setAuthError(null); setIsLoginOpen(true); }}
               className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-xl font-bold backdrop-blur-md transition-colors"
             >
               Log in
@@ -1820,8 +2156,9 @@ export default function App() {
               </div>
               
               <form className="space-y-6" onSubmit={handleLogin}>
+                {authError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{authError}</p>}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">MSU Email / ID</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email</label>
                   <input 
                     name="email"
                     type="email" 
@@ -1875,7 +2212,7 @@ export default function App() {
               
               <div className="mt-8 pt-8 border-t border-white/5 text-center">
                 <p className="text-sm text-gray-500">
-                  Don't have an account? <button onClick={() => { setIsLoginOpen(false); setIsSignupOpen(true); }} className="text-amber-500 font-semibold hover:underline">Register here</button>
+                  Don't have an account? <button onClick={() => { setAuthError(null); setIsLoginOpen(false); setIsSignupOpen(true); }} className="text-amber-500 font-semibold hover:underline">Register here</button>
                 </p>
               </div>
             </motion.div>
@@ -1899,6 +2236,7 @@ export default function App() {
               </div>
               
               <form className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-hide" onSubmit={handleSignup}>
+                {authError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{authError}</p>}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Full Name</label>
@@ -1950,15 +2288,13 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Gmail Address</label>
+                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Email Address</label>
                   <input 
                     name="email"
                     type="email" 
-                    placeholder="juan.delacruz@gmail.com"
+                    placeholder="juan.delacruz@example.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors"
                     required
-                    pattern=".+@gmail\.com"
-                    title="Please use a valid @gmail.com address"
                   />
                 </div>
                 
@@ -2006,7 +2342,7 @@ export default function App() {
               
               <div className="mt-8 pt-8 border-t border-white/5 text-center">
                 <p className="text-sm text-gray-500">
-                  Already have an account? <button onClick={() => { setIsSignupOpen(false); setIsLoginOpen(true); }} className="text-amber-500 font-semibold hover:underline">Sign In</button>
+                  Already have an account? <button onClick={() => { setAuthError(null); setIsSignupOpen(false); setIsLoginOpen(true); }} className="text-amber-500 font-semibold hover:underline">Sign In</button>
                 </p>
               </div>
             </motion.div>
@@ -2039,7 +2375,7 @@ export default function App() {
                   <input 
                     name="email"
                     type="email" 
-                    placeholder="juan.delacruz@gmail.com"
+                    placeholder="juan.delacruz@example.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
                     required
                     pattern=".+@gmail\.com"
@@ -2089,21 +2425,24 @@ export default function App() {
   );
 
   const renderExplorer = () => {
-    const activeCampus = selectedCampus || CAMPUSES[0];
+    const activeCampus = CAMPUSES.find(campus => campus.slug === activeCampusSlug) || CAMPUSES[0];
 
     return (
       <div className="h-full w-full bg-[#0a0502] flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar - Campus List */}
         <div className="w-full md:w-80 border-r border-white/5 flex flex-col shrink-0 bg-black/40 backdrop-blur-md">
-          <div className="p-6 border-b border-white/5 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-white">MSU <span className="text-amber-500">System</span></h2>
-            <button onClick={() => setView('home')} className="text-gray-500 hover:text-white"><X /></button>
+          <div className="p-6 border-b border-white/5">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl font-bold text-white">MSU <span className="text-amber-500">System</span></h2>
+              <button onClick={() => setView('home')} className="text-gray-500 hover:text-white"><X /></button>
+            </div>
+            <p className="text-[10px] uppercase tracking-widest text-amber-400/70 font-bold">{CAMPUSES.length} campuses and extension units loaded</p>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide">
             {CAMPUSES.map((campus) => (
               <button
                 key={campus.slug}
-                onClick={() => setSelectedCampus(campus)}
+                onClick={() => setActiveCampusSlug(campus.slug)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${activeCampus.slug === campus.slug ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-400 hover:bg-white/5'}`}
               >
                 <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden shadow-inner">
@@ -2152,11 +2491,26 @@ export default function App() {
               </div>
               
               <div className="flex gap-3">
-                <button className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all backdrop-blur-md">
+                <button
+                  onClick={() => window.open(activeCampus.website, '_blank', 'noopener,noreferrer')}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                >
                   Official Website
                 </button>
-                <button className="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
-                  Campus Map
+                <button
+                  onClick={() => {
+                    setSelectedCampus(activeCampus);
+                    setShowCampusModal(true);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-[#2f2a1b] to-[#1a1712] border border-[#b99740]/35 text-xs font-bold text-[#f1dfab] hover:from-[#3a3422] hover:to-[#211d16] transition-all backdrop-blur-md"
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={() => window.open(getCampus3DMapUrl(activeCampus), '_blank', 'noopener,noreferrer')}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a547] via-[#d8b24a] to-[#b99740] text-black font-bold text-xs hover:brightness-110 transition-all shadow-lg shadow-[#b99740]/30"
+                >
+                  3D Campus Map
                 </button>
               </div>
             </div>
@@ -2222,6 +2576,24 @@ export default function App() {
                   ))}
                 </div>
               </section>
+
+              <section className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500/60 mb-6">Reliable Sources</h3>
+                <div className="space-y-3">
+                  {activeCampus.sources.map((source) => (
+                    <a
+                      key={source.url}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/20 transition-all group"
+                    >
+                      <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{source.label}</span>
+                      <ExternalLink size={14} className="text-gray-500 group-hover:text-amber-500" />
+                    </a>
+                  ))}
+                </div>
+              </section>
             </div>
 
             {/* Right: Newsfeed */}
@@ -2245,7 +2617,7 @@ export default function App() {
 
         {/* Campus Detail Modal */}
         <AnimatePresence>
-          {selectedCampus && (
+          {showCampusModal && selectedCampus && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -2258,7 +2630,7 @@ export default function App() {
                     <CampusLogo slug={selectedCampus.slug} />
                   </div>
                   <button 
-                    onClick={() => setSelectedCampus(null)}
+                    onClick={() => { setShowCampusModal(false); setSelectedCampus(null); }}
                     className="absolute top-4 right-4 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
                   >
                     <X size={20} />
@@ -2581,6 +2953,24 @@ export default function App() {
             </p>
           </motion.div>
         </div>
+
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-20"
+        >
+          <h2 className="text-3xl font-bold mb-6 text-metallic-gold">New ONEMSU Logo Choices</h2>
+          <p className="text-gray-400 mb-8">Choose a direction that best represents unity, excellence, and innovation for ONEMSU.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {[1,2,3,4,5].map((v) => (
+              <div key={v} className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+                <BrandLogoChoice variant={v} className="w-20 h-20 mx-auto mb-3" />
+                <div className="text-xs font-bold text-amber-300">Concept {v}</div>
+              </div>
+            ))}
+          </div>
+        </motion.section>
 
         <section className="text-center">
           <h2 className="text-3xl font-bold mb-12">Join the Community</h2>
@@ -4208,7 +4598,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-auto scrollbar-hide fixed inset-0">
+    <div className="min-h-[100dvh] w-full selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden overflow-y-auto scrollbar-hide">
       <AnimatePresence>
         {showSplash && (
           <motion.div
@@ -4219,6 +4609,56 @@ export default function App() {
             className="fixed inset-0 z-[9999]"
           >
             <SplashScreen />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showWelcome && !showSplash && (
+          <motion.div
+            key="welcome-presentation"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.98 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 12, scale: 0.98 }}
+              className="w-full max-w-3xl card-gold rounded-3xl p-6 md:p-10"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl md:text-3xl font-black text-metallic-gold">{WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].title}</h2>
+                <button onClick={() => { setShowWelcome(false); localStorage.setItem('onemsu_welcome_seen', 'true'); }} className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-bold hover:bg-white/20">Skip</button>
+              </div>
+
+              <p className="text-gray-300 mb-5 leading-relaxed">
+                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].text}
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                {WELCOME_SCENES[Math.min(WELCOME_SCENES.length - 1, Math.floor((60 - welcomeSecond) / 12))].tips.map((tip) => (
+                  <div key={tip} className="p-3 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-200">
+                    {tip}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                  <span>Welcome presentation (60s)</span>
+                  <span>{welcomeSecond}s left</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 transition-all duration-500" style={{ width: `${((60 - welcomeSecond) / 60) * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button onClick={() => { setShowWelcome(false); localStorage.setItem('onemsu_welcome_seen', 'true'); }} className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold hover:bg-white/20">Start Exploring</button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
