@@ -670,12 +670,6 @@ export default function App() {
   }, [view]);
 
   useEffect(() => {
-    if (view === 'explorer' && selectedCampus) {
-      setActiveCampusSlug(selectedCampus.slug);
-    }
-  }, [view, selectedCampus]);
-
-  useEffect(() => {
     localStorage.setItem('onemsu_auth', isLoggedIn.toString());
     if (user) localStorage.setItem('onemsu_user', JSON.stringify(user));
     else localStorage.removeItem('onemsu_user');
