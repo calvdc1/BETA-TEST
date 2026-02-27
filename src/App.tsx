@@ -651,12 +651,19 @@ const CampusLogo = ({ slug, className = "w-full h-full" }: { slug: string, class
 };
 
 export default function App() {
+  const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound', 'scheduler'] as const;
+  const getViewFromHash = () => {
+    if (typeof window === 'undefined') return null;
+    const hashView = window.location.hash.replace('#', '').trim();
+    return validViews.includes(hashView as any) ? (hashView as typeof validViews[number]) : null;
+  };
   const [showSplash, setShowSplash] = useState(true);
   const [view, setView] = useState<'home' | 'explorer' | 'about' | 'dashboard' | 'messenger' | 'newsfeed' | 'profile' | 'confession' | 'feedbacks' | 'lostfound' | 'scheduler'>(() => {
     if (typeof window !== 'undefined') {
+      const hashView = getViewFromHash();
+      if (hashView) return hashView;
       const saved = localStorage.getItem('onemsu_view');
-      const validViews = ['home', 'explorer', 'about', 'dashboard', 'messenger', 'newsfeed', 'profile', 'confession', 'feedbacks', 'lostfound', 'scheduler'];
-      if (saved && validViews.includes(saved)) {
+      if (saved && validViews.includes(saved as any)) {
         return saved as any;
       }
     }
@@ -675,6 +682,20 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('onemsu_view', view);
+    if (typeof window !== 'undefined' && window.location.hash !== `#${view}`) {
+      window.history.replaceState(null, '', `#${view}`);
+    }
+  }, [view]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hashView = getViewFromHash();
+      if (hashView && hashView !== view) {
+        setView(hashView);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [view]);
 
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
